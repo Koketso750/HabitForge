@@ -1,4 +1,4 @@
-package user;
+package swp.habitforge.habitforge.user;
 
 import jakarta.persistence.*;
 import java.util.Date;
