@@ -15,7 +15,7 @@ public class FirebaseConfig {
 
     @Bean
     public FirebaseApp initializeFirebase() throws IOException {
-        // Load the firebase-config.json file from the resources directory
+        // Load the firebase-config.json file from the resources directory.
         InputStream serviceAccount = new ClassPathResource("habitforge-5230e-firebase-adminsdk-fbsvc-36d6f865cb.json").getInputStream();
 
         FirebaseOptions options = FirebaseOptions.builder()

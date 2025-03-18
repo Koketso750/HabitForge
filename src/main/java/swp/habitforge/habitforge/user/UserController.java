@@ -43,7 +43,7 @@ public class UserController {
             // Save new user to the database
             userRepository.save(newUser);
 
-            // Redirect to the login or success page
+            // Redirect to the login or success page.
             return "redirect:/results";  // Or any page you want to redirect the user to
     }
 

@@ -17,7 +17,7 @@ import java.util.Optional;
 public class FirebaseStorageService {
 
     public String uploadProfilePicture(MultipartFile file, String username) throws IOException {
-        // Get a reference to Firebase storage
+        // Get a reference to Firebase storage.
         Bucket bucket = StorageClient.getInstance().bucket();
 
         // Generate a unique file name using the username
