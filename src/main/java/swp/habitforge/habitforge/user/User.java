@@ -21,6 +21,19 @@ public class User {
 
     public User() {}
 
+    public User(Integer userId, String username, String email, String password, String name, String surname, String profilePicture, String role, Date createdAt, Date updatedAt) {
+        this.userId = userId;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.surname = surname;
+        this.profilePicture = profilePicture;
+        this.role = role;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public User(String username, String email, String password, String name, String surname, String profilePicture, String role) {
         this.username = username;
         this.email = email;
@@ -29,8 +42,6 @@ public class User {
         this.surname = surname;
         this.profilePicture = profilePicture;
         this.role = role;
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
     }
 
     // Getters and setters
