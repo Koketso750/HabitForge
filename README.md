@@ -66,9 +66,6 @@ Contributions are welcome! Please follow these steps:
 4. Push to your branch (`git push origin feature-branch`).
 5. Submit a pull request.
 
-## Contact
-For any queries or contributions, reach out via email at `koketsomatome750@gmail.com` or open an issue in the repository.
-
 ---
 Happy habit-building with HabitForge! 🚀
 
