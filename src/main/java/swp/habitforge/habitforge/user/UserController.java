@@ -38,7 +38,7 @@ public class UserController {
             newUser.setName(name);
             newUser.setSurname(surname);
             newUser.setProfilePicture(profilePictureUrl);  // Store the Firebase URL
-            newUser.setRole("user");  // Default role as 'user'
+            //newUser.setRole("user");  // Default role as 'user'
 
             // Save new user to the database
             userRepository.save(newUser);
