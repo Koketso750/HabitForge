@@ -20,7 +20,7 @@ public class CoachController {
     @Autowired private CoachService coachService;
     @Autowired private FirebaseStorageService firebaseStorageService;
 
-    @GetMapping("coach/sign/up")
+    @GetMapping("/coach/sign/up")
     public String goToCoachSignUp(){
         return "coach-sign-up";
     }
