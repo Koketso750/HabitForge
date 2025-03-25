@@ -15,13 +15,12 @@ public class User {
     private String name;
     private String surname;
     private String profilePicture;
-    private String role;
     private Date createdAt;
     private Date updatedAt;
 
     public User() {}
 
-    public User(Integer userId, String username, String email, String password, String name, String surname, String profilePicture, String role, Date createdAt, Date updatedAt) {
+    public User(Integer userId, String username, String email, String password, String name, String surname, String profilePicture, Date createdAt, Date updatedAt) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -29,19 +28,17 @@ public class User {
         this.name = name;
         this.surname = surname;
         this.profilePicture = profilePicture;
-        this.role = role;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    public User(String username, String email, String password, String name, String surname, String profilePicture, String role) {
+    public User(String username, String email, String password, String name, String surname, String profilePicture) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.name = name;
         this.surname = surname;
         this.profilePicture = profilePicture;
-        this.role = role;
     }
 
     // Getters and setters
@@ -99,14 +96,6 @@ public class User {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
     public Date getCreatedAt() {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HabitForge - Your Wellness Companion</title>
+    <title>Login - HabitForge</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -36,47 +36,75 @@
             color: var(--accent-orange) !important;
         }
 
-        .banner {
-            background: url('/images/banners/home-page.jpg') no-repeat center center/cover;
-            height: 700px; /* Adjusted for mobile */
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-        }
-
-        .banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(139, 69, 19, 0.3); /* Brown overlay with 30% opacity */
-            backdrop-filter: blur(2px); /* Blur effect */
-        }
-
-        .banner-content {
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
             position: relative;
             z-index: 1;
-            padding: 0 20px; /* Added padding for better spacing on mobile */
         }
 
-        .banner h2 {
-            font-size: 2.5rem; /* Adjusted for mobile */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .banner p.lead {
-            font-size: 1.25rem; /* Adjusted for mobile */
-        }
-
-        .feature-icon {
-            font-size: 2.5rem; /* Adjusted for mobile */
+        .form-label {
             color: var(--secondary-brown);
+            font-weight: bold;
         }
 
+        .form-control {
+            border: 1px solid var(--secondary-brown);
+            border-radius: 5px;
+            padding-left: 2.5rem; /* Space for icons */
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-brown);
+            font-size: 1.2rem;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place behind other content */
+            object-fit: cover; /* Ensure video covers the entire background */
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .success-message {
+            color: var(--primary-green);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Custom Button Styling */
         .btn-primary {
             background-color: var(--secondary-brown);
             border-color: var(--secondary-brown);
@@ -87,6 +115,16 @@
             border-color: var(--accent-orange);
         }
 
+        /* Forgot Password Link */
+        .text-brown {
+            color: var(--secondary-brown);
+        }
+
+        .text-brown:hover {
+            color: var(--accent-orange);
+        }
+
+        /* Footer Styling */
         .footer {
             background-color: var(--primary-green);
             color: white;
@@ -101,70 +139,19 @@
         .footer a:hover {
             color: white;
         }
-
-        /* Modal Styling */
-        .modal-content {
-            background-color: var(--background-beige);
-            border: 1px solid var(--secondary-brown);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid var(--secondary-brown);
-        }
-
-        .modal-title {
-            color: var(--secondary-brown);
-        }
-
-        .modal-body {
-            color: var(--text-dark);
-        }
-
-        .modal-footer {
-            border-top: 1px solid var(--secondary-brown);
-        }
-
-        /* Custom Green Close Button */
-        .btn-green {
-            background-color: var(--primary-green);
-            border-color: var(--primary-green);
-            color: white;
-        }
-
-        .btn-green:hover {
-            background-color: #45a049; /* Slightly darker green on hover */
-            border-color: #45a049;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .banner {
-                height: 400px; /* Smaller height for mobile */
-            }
-
-            .banner h2 {
-                font-size: 2rem; /* Smaller font size for mobile */
-            }
-
-            .banner p.lead {
-                font-size: 1rem; /* Smaller font size for mobile */
-            }
-
-            .feature-icon {
-                font-size: 2rem; /* Smaller icons for mobile */
-            }
-
-            .btn-primary {
-                font-size: 1rem; /* Smaller button text for mobile */
-            }
-        }
     </style>
 </head>
 <body>
+<!-- Video Background -->
+<video class="video-background" autoplay muted loop>
+    <source src="/videos/4K%20Relaxing%20Nature%20Sounds%20-%20Short%20Video%20Clips%20of%20Nature.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" th:href="@{/}">
             <i class="bi bi-heart-fill"></i> HabitForge
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -173,7 +160,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <a class="nav-link" th:href="@{/coach/sign/up}">Sign Up</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Wellness Content</a>
@@ -184,54 +171,55 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Feedback</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Login</a>
-                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- Banner Section -->
-<div class="banner">
-    <div class="banner-content">
-        <h1 class="display-4"><i class="bi bi-heart-fill"></i></h1>
-        <h1 class="display-4">Build Healthy Habits with HabitForge</h1>
-        <p class="lead">Your personalized wellness companion for mental, physical, and emotional well-being.</p>
-        <!-- Button to trigger modal -->
-        <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#signupModal">
-            Get Started
-        </button>
-    </div>
-</div>
-
-<!-- Features Section -->
+<!-- Login Form Section -->
 <div class="container my-5">
-    <div class="row text-center">
-        <div class="col-md-4 mb-4">
-            <i class="bi bi-calendar-check feature-icon"></i>
-            <h3>Task Management</h3>
-            <p>Organize your tasks with our intuitive calendar view and stay on top of your goals.</p>
-        </div>
-        <div class="col-md-4 mb-4">
-            <i class="bi bi-book feature-icon"></i>
-            <h3>Wellness Content</h3>
-            <p>Access expert-curated content for mental, physical, and emotional wellness.</p>
-        </div>
-        <div class="col-md-4 mb-4">
-            <i class="bi bi-chat-dots feature-icon"></i>
-            <h3>User Feedback</h3>
-            <p>Share your thoughts and help us improve the content for everyone.</p>
-        </div>
-    </div>
-</div>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="form-container">
+                <h2 class="display-4 text-center mb-4"><i class="bi bi-box-arrow-in-right"></i> Login</h2>
+                <!-- Display error/success messages -->
+                <div th:if="${error}" class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+                </div>
+                <div th:if="${success}" class="alert alert-success" role="alert">
+                    <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+                </div>
+                <form th:action="@{/login/dashboard}" method="post">
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="position-relative">
+                            <i class="bi bi-envelope input-icon"></i>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                        </div>
+                    </div>
 
-<!-- Call to Action Section -->
-<div class="bg-light py-5" style="background-color: var(--accent-orange) !important;">
-    <div class="container text-center">
-        <h2>Ready to Transform Your Life?</h2>
-        <p class="lead">Join HabitForge today and start your journey towards a healthier, happier you.</p>
-        <a href="#" class="btn btn-primary btn-lg">Sign Up Now</a>
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="position-relative">
+                            <i class="bi bi-lock input-icon"></i>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <!-- Forgot Password Link -->
+                    <div class="text-end mb-3">
+                        <a href="#" class="text-decoration-none text-brown">Forgot Password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -240,39 +228,11 @@
     <div class="container">
         <p class="mb-0">&copy; 2025 HabitForge. All rights reserved.</p>
         <p>
-            <a href="#" class="me-3">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
+            <a href="#" class="me-3 text-decoration-none text-orange">Privacy Policy</a>
+            <a href="#" class="text-decoration-none text-orange">Terms of Service</a>
         </p>
     </div>
 </footer>
-
-<!-- Signup Modal -->
-<div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="signupModalLabel">
-                    <i class="bi bi-person-plus"></i> Sign Up
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Choose your role to get started:</p>
-                <div class="d-grid gap-3">
-                    <a href="#" class="btn btn-primary btn-lg">
-                        <i class="bi bi-person"></i> Sign Up as User
-                    </a>
-                    <a href="#" class="btn btn-primary btn-lg">
-                        <i class="bi bi-person-badge"></i> Sign Up as Coach
-                    </a>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-green" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

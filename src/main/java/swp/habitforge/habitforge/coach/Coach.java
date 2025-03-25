@@ -12,39 +12,45 @@ public class Coach {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer coachId;
+
+    private String name;
+    private String surname;
+    private String profilePicture;
     private String email;
     private String password;
     private String bio;
     private String expertise;
-    private String profilePicture;
     private Date createdAt;
     private Date updatedAt;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "coach_id")
-    private User user;
-
     public Coach() {}
 
-    public Coach(Integer coachId, String email, String password, String bio, String expertise, String profilePicture, Date createdAt, Date updatedAt, User user) {
-        this.coachId = coachId;
+    public Coach(String name, String surname, String profilePicture, String email, String password, String bio, String expertise, Date createdAt, Date updatedAt) {
+        this.name = name;
+        this.surname = surname;
+        this.profilePicture = profilePicture;
         this.email = email;
         this.password = password;
         this.bio = bio;
         this.expertise = expertise;
-        this.profilePicture = profilePicture;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.user = user;
     }
 
-    public Integer getCoachId() {
-        return coachId;
+    public String getName() {
+        return name;
     }
 
-    public void setCoachId(Integer coachId) {
-        this.coachId = coachId;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getEmail() {
@@ -101,13 +107,5 @@ public class Coach {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }

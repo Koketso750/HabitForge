@@ -7,4 +7,8 @@ import org.springframework.stereotype.Service;
 public class CoachService {
 
     @Autowired private CoachRepository coachRepository;
+
+    public boolean emailExists(String email) {
+        return CoachRepository.findByEmail(email) != null;
+    }
 }

@@ -13,7 +13,7 @@ public class Task {
     private Integer taskId;
     private String taskName;
     private String taskDescription;
-    private java.sql.Date dueDate;
+    private Date dueDate;
     private Boolean completed;
     private String habitType;
     private Integer habitFrequency;
@@ -26,7 +26,7 @@ public class Task {
 
     public Task() {}
 
-    public Task(Integer taskId, String taskName, String taskDescription, java.sql.Date dueDate, Boolean completed, String habitType, Integer habitFrequency, Date createdAt, Date updatedAt, User user) {
+    public Task(Integer taskId, String taskName, String taskDescription, Date dueDate, Boolean completed, String habitType, Integer habitFrequency, Date createdAt, Date updatedAt, User user) {
         this.taskId = taskId;
         this.taskName = taskName;
         this.taskDescription = taskDescription;
@@ -63,11 +63,11 @@ public class Task {
         this.taskDescription = taskDescription;
     }
 
-    public java.sql.Date getDueDate() {
+    public Date getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(java.sql.Date dueDate) {
+    public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
 
