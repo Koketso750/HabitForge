@@ -65,6 +65,10 @@ public class Coach {
         return password;
     }
 
+    public Integer getCoachId() {
+        return coachId;
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title> Manage Coaches </title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+
+</head>
+
+<body>
+<div class="container-fluid text-center" >
+
+    <div> <h1>Admin Panel - Shauntel</h1>
+        <h1>Manage Coaches </h1>
+ </div>
+    <div class="m-2" >
+ <a class="h3" th:href="@{/coach_form}">Add New Coach </a>
+   </div>
+
+    <div>
+        <table class="table table-bordered">
+
+            <thead class="thead-dark">
+
+            <tr>
+                <th>ID</th>
+                <th>First Name </th>
+                <th>Last Name </th>
+                <th>Profile  Picture  </th>
+                <th>E-mail</th>
+                <th>Bio</th>
+                <th>Experties</th>
+                <th>Created-At</th>
+                <th>Updated-At</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+
+
+            <tbody>
+
+            <tr   th:each="coach : ${listCoaches}" >
+
+                <td th:text="${coach.coachId}">1</td>
+                <td th:text="${coach.name}">John</td>
+                <td th:text="${coach.surname}">Doe</td>
+                <td th:text="${coach.profilePicture}">profile_pic_url</td>
+                <td th:text="${coach.email}">email@example.com</td>
+                <td th:text="${coach.bio}">Expert in wellness and fitness.</td>
+                <td th:text="${coach.expertise}">Fitness</td>
+                <td th:text="${coach.createdAt}">2025-04-06</td>
+                <td th:text="${coach.updatedAt}">2025-04-07</td>
+                <td>
+                    <a >Edit</a>
+                </td>
+                <td>
+                    <a>Delete</a>
+                </td>
+            </tr>
+
+
+            </tbody>
+
+  </table>
+
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add new coach </title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container-fluid">
+    <div class="text-center">
+        <!-- Heading Changes Dynamically -->
+        <h2 th:text="${success != null} ? 'Coach successfully added' : 'Add A Coach'">Add A Coach</h2>
+    </div>
+    <!-- Display Success or Error Message -->
+    <div class="alert alert-success text-center" th:if="${success != null}" th:text="${success}"></div>
+    <div class="alert alert-danger text-center" th:if="${error != null}" th:text="${error}"></div>
+
+    <form th:action="@{/coach/register}" method="post" enctype="multipart/form-data" style="max-width: 500px; margin: 0 auto;">
+        <div class="border border-secondary rounded p-3">
+
+            <!-- First Name Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">First Name</label>
+                <div class="col-sm-8">
+                    <input type="text" name="name" class="form-control" placeholder="Enter first name" required />
+                </div>
+            </div>
+
+            <!-- Last Name Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Last Name</label>
+                <div class="col-sm-8">
+                    <input type="text" name="surname" class="form-control" placeholder="Enter last name" required />
+                </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Email</label>
+                <div class="col-sm-8">
+                    <input type="email" name="email" class="form-control" placeholder="Enter email" required />
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Password</label>
+                <div class="col-sm-8">
+                    <input type="password" name="password" class="form-control" placeholder="Enter password" required />
+                </div>
+            </div>
+
+            <!-- Profile Pic  Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Profile Picture URL</label>
+                <div class="col-sm-8">
+                    <input type="url" name="url" class="form-control" placeholder="Enter profile picture URL" required />
+                </div>
+            </div>
+
+            <!-- Bio Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Bio</label>
+                <div class="col-sm-8">
+                    <textarea name="bio" class="form-control" rows="3" placeholder="Enter a brief bio" required></textarea>
+                </div>
+            </div>
+
+            <!-- Expertise Field -->
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Expertise</label>
+                <div class="col-sm-8">
+                    <input type="text" name="expertise" class="form-control" placeholder="Enter area of expertise" required />
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group row">
+                <div class="col-sm-12 text-center">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+</body>
+</html>
