@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Coach</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container-fluid">
+  <div class="text-center">
+    <h2>Edit Coach</h2>
+  </div>
+
+  <!-- Display Success or Error Message -->
+  <div class="alert alert-success text-center" th:if="${success != null}" th:text="${success}"></div>
+  <div class="alert alert-danger text-center" th:if="${error != null}" th:text="${error}"></div>
+
+  <form th:action="@{'/coach/update/' + ${coach.coachId}}" method="post" style="max-width: 500px; margin: 0 auto;">
+    <div class="border border-secondary rounded p-3">
+      <h2>Coach Edit Form</h2>
+
+      <!-- Hidden ID field -->
+      <input type="hidden" name="coachId" th:value="${coach.coachId}" />
+
+      <!-- First Name Field -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">First Name</label>
+        <div class="col-sm-8">
+          <input type="text" name="name" class="form-control" th:value="${coach.name}" required />
+        </div>
+      </div>
+
+      <!-- Last Name Field -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">Last Name</label>
+        <div class="col-sm-8">
+          <input type="text" name="surname" class="form-control" th:value="${coach.surname}" required />
+        </div>
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">Email</label>
+        <div class="col-sm-8">
+          <input type="email" name="email" class="form-control" th:value="${coach.email}" required />
+        </div>
+      </div>
+
+      <!-- Password Field (optional to change) -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">New Password (leave blank to keep current)</label>
+        <div class="col-sm-8">
+          <input type="password" name="password" class="form-control" />
+        </div>
+      </div>
+
+      <!-- Profile Pic Field -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">Profile Picture URL</label>
+        <div class="col-sm-8">
+          <input type="url" name="profilePicture" class="form-control"
+                 th:value="${coach.profilePicture}" required />
+        </div>
+      </div>
+
+      <!-- Bio Field -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">Bio</label>
+        <div class="col-sm-8">
+                    <textarea name="bio" class="form-control" rows="3" required
+                              th:text="${coach.bio}"></textarea>
+        </div>
+      </div>
+
+      <!-- Expertise Field -->
+      <div class="form-group row">
+        <label class="col-sm-4 col-form-label">Expertise</label>
+        <div class="col-sm-8">
+          <input type="text" name="expertise" class="form-control"
+                 th:value="${coach.expertise}" required />
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-group row">
+        <div class="col-sm-12 text-center">
+          <button type="submit" class="btn btn-primary">Update</button>
+          <a th:href="@{/admin_shauntel}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+</body>
+</html>
