@@ -3,114 +3,132 @@ package swp.habitforge.habitforge.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.habitforge.habitforge.firebase.FirebaseStorageService;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class UserController {
-    @Autowired private UserRepository userRepository;
-    @Autowired private UserService userService;
-    @Autowired private FirebaseStorageService firebaseStorageService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+    // Display admin panel with list of all users
     @GetMapping("/admin_patience")
-    public String ManageUsers (Model model ) {
-        List<User>listUsers =userService.listAll();
-        model.addAttribute("listUsers",listUsers);
+    public String manageUsers(Model model) {
+        List<User> listUsers = userService.listAll();
+        model.addAttribute("listUsers", listUsers);
         return "admin_patience";
     }
 
+    // Show form for adding a new user
     @GetMapping("/user_form")
-    public String showAddCoachForm ( Model model ){
- model.addAttribute("user", new User());
- return "user_form";
-    }
-
-    //add a user
-    @GetMapping("/user/create")
-    public String showUserCreatedForm ( Model model ){
+    public String showUserForm(Model model) {
         model.addAttribute("user", new User());
-        return "/user/create";
-
+        return "user_form";
     }
 
-    //edit a user
+    // Show form for creating a new user (alternative endpoint)
+    @GetMapping("/user/create")
+    public String showUserCreateForm(Model model) {
+        model.addAttribute("user", new User());
+        return "user/create";
+    }
 
-
-    //delete a user
-
-
-
-
+    // Process form submission for creating a new user
     @PostMapping("/user/create")
     public String createUser(
-          //  @RequestParam("file") MultipartFile file,
-            @RequestParam("username") String username,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("name") String name,
-            @RequestParam("surname") String surname,
-            @RequestParam("url") String url,
+            @ModelAttribute("user") User user,
+            RedirectAttributes redirectAttributes
+    ) throws IOException {
+        try {
+            // Set timestamps
+            user.setCreatedAt(new Date());
+            user.setUpdatedAt(new Date());
 
-             RedirectAttributes redirectAttributes)
+            // Save the user
+            userRepository.save(user);
 
-
-            throws IOException {
-
-            // Upload profile picture to Firebase and get the URL
-          //  String profilePictureUrl = firebaseStorageService.uploadProfilePicture(file, username);
-
-            // Create new User object
-            User newUser = new User();
-            newUser.setUsername(username);
-            newUser.setEmail(email);
-            newUser.setPassword(password);  // Make sure to hash this password before saving
-            newUser.setName(name);
-            newUser.setSurname(surname);
-            newUser.setProfilePicture(url);  // Store the Firebase URL
-            //newUser.setRole("user");  // Default role as 'user'
-        newUser.setCreatedAt(new Date());
-        newUser.setUpdatedAt(new Date());
-
-            // Save new user to the database
-            userRepository.save(newUser);
-          if (newUser.getUserId()== null) {
-            throw new IllegalStateException("User was not saved!");
-          }
-
-            // Redirect to the login or success page.
-        // used to redirect to results
-        // added
-//
-            redirectAttributes.addFlashAttribute("success", "User registration successful!.");
-            return "redirect:/user/create";  // Or any page you want to redirect the user to
+            redirectAttributes.addFlashAttribute("success", "User created successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error creating user: " + e.getMessage());
+        }
+        return "redirect:/admin_patience";
     }
 
-    @GetMapping("/all/users")
-    public String getAllUsers(Model model) {
-        // Fetch all users from the database
-        List<User> users = (List<User>) userRepository.findAll();
-
-        // Add the list of users to the model
-        model.addAttribute("users", users);
-
-        // Return the Thymeleaf template name
-        return "all-users";
+    // Show form for editing an existing user
+    @GetMapping("/user/update/{id}")
+    public String editUser(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+            model.addAttribute("user", user);
+            return "edit_user";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin_patience";
+        }
     }
 
+    // Process form submission for updating a user
+    @PostMapping("/user/update/{id}")
+    public String updateUser(
+            @PathVariable("id") Integer id,
+            @ModelAttribute("user") User user,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            // Get existing user data
+            User existingUser = userRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
 
-    /* @GetMapping("/admin_shauntel")
-  public String ManageCoaches (Model model){
-        List<Coach>listCoaches=coachService.listAll();
-        model.addAttribute("listCoaches",listCoaches);
-        return "admin_shauntel";
-    }*/
+            // Update fields
+            existingUser.setUsername(user.getUsername());
+            existingUser.setEmail(user.getEmail());
+            existingUser.setName(user.getName());
+            existingUser.setSurname(user.getSurname());
+            existingUser.setProfilePicture(user.getProfilePicture());
 
+            // Only update password if a new one was provided
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                existingUser.setPassword(user.getPassword());
+            }
+
+            // Update timestamp
+            existingUser.setUpdatedAt(new Date());
+
+            // Save the updated user
+            userRepository.save(existingUser);
+
+            redirectAttributes.addFlashAttribute("success", "User updated successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error updating user: " + e.getMessage());
+        }
+        return "redirect:/admin_patience";
+    }
+
+    // Delete a user
+    @GetMapping("/user/delete/{id}")
+    public String deleteUser(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+            userRepository.delete(user);
+            redirectAttributes.addFlashAttribute("success", "User deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error deleting user: " + e.getMessage());
+        }
+        return "redirect:/admin_patience";
+    }
 }
