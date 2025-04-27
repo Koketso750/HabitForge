@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - HabitForge</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Autumn Nature Theme */
+        :root {
+            --primary-green: #4CAF50; /* Fresh green */
+            --secondary-brown: #8B4513; /* Warm brown */
+            --accent-orange: #FFA500; /* Autumn orange */
+            --background-beige: #F5F5DC; /* Light beige */
+            --text-dark: #2E2E2E; /* Dark gray for text */
+        }
+
+        body {
+            background-color: #D6C7B1; /* Darker beige background */
+            color: var(--text-dark); /* Retain the text color */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary-green) !important;
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-orange) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-brown);
+            border-color: var(--secondary-brown);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-orange);
+            border-color: var(--accent-orange);
+        }
+
+        .footer {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 20px 0;
+        }
+
+        .footer a {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        /* Dashboard Styling */
+        .dashboard-header {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--accent-orange);
+        }
+
+        .profile-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-top: 3px solid var(--secondary-brown);
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--secondary-brown);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .nav-tabs .nav-link {
+            color: black; /* Set text color to black */
+            font-weight: 500;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: black; /* White text for active tab */
+            background-color: var(--accent-orange); /* Orange background for active tab */
+            border-color: var(--secondary-brown) var(--secondary-brown) var(--background-beige);
+            border-width: 2px;
+        }
+
+        .nav-tabs .nav-link:hover:not(.active) {
+            color: black; /* Black text on hover */
+            border-color: transparent;
+        }
+
+        .table {
+            background-color: white;
+        }
+
+        .table thead {
+            background-color: var(--secondary-brown);
+            color: white;
+        }
+
+        .table th {
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(139, 69, 19, 0.1);
+        }
+
+        .badge-orange {
+            background-color: var(--accent-orange);
+            color: white;
+        }
+
+        .badge-brown {
+            background-color: var(--secondary-brown);
+            color: white;
+        }
+
+        /* Breadcrumb Styling */
+        .breadcrumb {
+            --bs-breadcrumb-divider-color: var(--secondary-brown);
+            --bs-breadcrumb-item-active-color: var(--accent-orange);
+            background-color: transparent;
+            padding: 0.75rem 0;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: var(--bs-breadcrumb-divider, "›");
+            color: var(--secondary-brown);
+            font-weight: bold;
+            padding: 0 0.5rem;
+        }
+
+        .text-brown {
+            color: var(--secondary-brown);
+        }
+
+        .text-orange {
+            color: var(--accent-orange);
+        }
+
+        .breadcrumb-item a {
+            color: var(--secondary-brown);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-orange);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="bi bi-heart-fill"></i> HabitForge
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="bi bi-journal-text"></i> Habits</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Progress</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="bi bi-gear"></i> Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a th:href="@{/}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="bi bi-person"></i> User Dashboard
+            </li>
+        </ol>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container my-5">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <img th:src="@{${user.profilePicture}}" alt="Profile Picture" class="profile-img">
+            </div>
+            <div class="col-md-10">
+                <h1 class="display-4 mb-3">Welcome, <span th:text="${user.name}" class="text-orange"></span>!</h1>
+                <p class="lead mb-0">Member since <span th:text="${#dates.format(user.createdAt, 'MMMM yyyy')}" class="text-brown"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                <i class="bi bi-person"></i> Profile
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="habits-tab" data-bs-toggle="tab" data-bs-target="#habits" type="button" role="tab" aria-controls="habits" aria-selected="false">
+                <i class="bi bi-journal-check"></i> My Habits
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab" aria-controls="progress" aria-selected="false">
+                <i class="bi bi-bar-chart"></i> Progress
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">
+                <i class="bi bi-gear"></i> Settings
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="dashboardTabsContent">
+        <!-- Profile Tab -->
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="profile-card">
+                <h3 class="mb-4"><i class="bi bi-person-badge"></i> Personal Information</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tbody>
+                        <tr>
+                            <th>Username</th>
+                            <td th:text="${user.username}"></td>
+                        </tr>
+                        <tr>
+                            <th>Full Name</th>
+                            <td th:text="${user.name + ' ' + user.surname}"></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td th:text="${user.email}"></td>
+                        </tr>
+                        <tr>
+                            <th>Account Created</th>
+                            <td th:text="${#dates.format(user.createdAt, 'MMMM dd, yyyy')}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Habits Tab -->
+        <div class="tab-pane fade" id="habits" role="tabpanel" aria-labelledby="habits-tab">
+            <div class="profile-card">
+                <h3 class="mb-4"><i class="bi bi-journal-check"></i> My Habits</h3>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You currently have no active habits. <a href="#" class="alert-link">Start building new habits now!</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Tab -->
+        <div class="tab-pane fade" id="progress" role="tabpanel" aria-labelledby="progress-tab">
+            <div class="profile-card">
+                <h3 class="mb-4"><i class="bi bi-bar-chart"></i> My Progress</h3>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Progress tracking will be available once you start building habits.
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+            <div class="profile-card">
+                <h3 class="mb-4"><i class="bi bi-gear"></i> Account Settings</h3>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-pencil"></i> Edit Profile Information
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-lock"></i> Change Password
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-image"></i> Update Profile Picture
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action text-danger">
+                        <i class="bi bi-trash"></i> Delete Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer text-center mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 HabitForge. All rights reserved.</p>
+        <p>
+            <a href="#" class="me-3">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </p>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

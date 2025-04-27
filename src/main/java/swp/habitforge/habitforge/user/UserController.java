@@ -1,16 +1,22 @@
 package swp.habitforge.habitforge.user;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import swp.habitforge.habitforge.firebase.FirebaseStorageService;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 public class UserController {
@@ -21,8 +27,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private FirebaseStorageService firebaseStorageService;
+
+    // Directory where profile pictures will be stored
+    private final String UPLOAD_DIR = "src/main/resources/static/images/profiles/";
 
     // Display admin panel with list of all users
     @GetMapping("/admin_patience")
@@ -39,12 +46,6 @@ public class UserController {
         return "user_form";
     }
 
-    // Show form for creating a new user (alternative endpoint)
-    @GetMapping("/user/create")
-    public String showUserCreateForm(Model model) {
-        model.addAttribute("user", new User());
-        return "user/create";
-    }
 
     // Process form submission for creating a new user
     @PostMapping("/user/create")
@@ -130,5 +131,140 @@ public class UserController {
             redirectAttributes.addFlashAttribute("error", "Error deleting user: " + e.getMessage());
         }
         return "redirect:/admin_patience";
+    }
+
+    @GetMapping("/user/sign/up")
+    public String goToUserSignUp(){
+        return "user-sign-up";
+    }
+
+    @PostMapping("/user/register")
+    public String processUserSignUp(
+            @RequestParam String username,
+            @RequestParam String name,
+            @RequestParam String surname,
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam MultipartFile profilePicture,
+            RedirectAttributes redirectAttributes) throws IOException {
+
+        // Check if username or email already exists
+        if (userService.usernameExists(username)) {
+            redirectAttributes.addFlashAttribute("error", "Username already exists. Please choose another one.");
+            return "redirect:/user-sign-up";
+        }
+
+        if (userService.emailExists(email)) {
+            redirectAttributes.addFlashAttribute("error", "Email already exists. Please log in.");
+            return "redirect:/user-sign-up";
+        }
+
+        // Create user object
+        User user = new User();
+        user.setUsername(username);
+        user.setName(name);
+        user.setSurname(surname);
+        user.setEmail(email);
+        user.setPassword(password); // In a real app, you should encrypt this password
+        user.setCreatedAt(new Date());
+        user.setUpdatedAt(new Date());
+
+        // Save user to get the ID
+        User savedUser = userRepository.save(user);
+
+        // Handle profile picture upload
+        if (!profilePicture.isEmpty()) {
+            // Create directory if it doesn't exist
+            File directory = new File(UPLOAD_DIR);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            // Generate unique filename using user ID
+            String fileExtension = getFileExtension(profilePicture.getOriginalFilename());
+            String fileName = "user_" + savedUser.getUserId() + "_" + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
+
+            // Save file to server
+            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+            Files.write(filePath, profilePicture.getBytes());
+
+            // Update user with profile picture path
+            String dbFilePath = "/images/profiles/" + fileName; // Path to be stored in database
+            savedUser.setProfilePicture(dbFilePath);
+            userRepository.save(savedUser);
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Registration successful! Please log in.");
+        return "redirect:/login/user";
+    }
+
+    // Helper method to get file extension
+    private String getFileExtension(String filename) {
+        if (filename == null) {
+            return "";
+        }
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex < 0) {
+            return "";
+        }
+        return filename.substring(dotIndex);
+    }
+
+    @GetMapping("/login/user")
+    public String showLoginPage() {
+        return "login_user";
+    }
+
+    @PostMapping("/login/user/dashboard")
+    public String processUserLogin(
+            @RequestParam String email,
+            @RequestParam String password,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        // Find user by email
+        User user = userRepository.findByEmail(email);
+
+        // Check if user exists and password matches
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "Email not found. Please check your email or sign up.");
+            return "redirect:/login/user";
+        }
+
+        if (!user.getPassword().equals(password)) {
+            redirectAttributes.addFlashAttribute("error", "Incorrect password. Please try again.");
+            return "redirect:/login/user";
+        }
+
+        // Store user in session
+        session.setAttribute("loggedInUser", user);
+
+        // Redirect to user dashboard
+        return "redirect:/user/dashboard";
+    }
+
+    @GetMapping("/user/dashboard")
+    public String showUserDashboard(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        // Check if user is logged in
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+
+        if (loggedInUser == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to access your dashboard.");
+            return "redirect:/login";
+        }
+
+        // Add user to model for dashboard display
+        model.addAttribute("user", loggedInUser);
+
+        return "user_dashboard";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+        // Clear session
+        session.invalidate();
+
+        redirectAttributes.addFlashAttribute("success", "You have been successfully logged out.");
+        return "redirect:/login/user";
     }
 }

@@ -1,32 +1,44 @@
 package swp.habitforge.habitforge.coach;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import swp.habitforge.habitforge.firebase.FirebaseStorageService;
+import swp.habitforge.habitforge.wellnesscontent.WellnessContent;
+import swp.habitforge.habitforge.wellnesscontent.WellnessContentService;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 public class CoachController {
 
     @Autowired private CoachRepository coachRepository;
     @Autowired private CoachService coachService;
-    @Autowired private FirebaseStorageService firebaseStorageService;
+    @Autowired private WellnessContentService wellnessContentService;
+
+
+    // Directory where profile pictures will be stored
+    private final String UPLOAD_DIR = "src/main/resources/static/images/coaches/";
 
     @GetMapping("/coach/sign/up")
     public String goToCoachSignUp(){
         return "coach-sign-up";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/login/coach")
     public String goToLogin(){
-        return "login";
+        return "login_coach";
     }
 
     @GetMapping("/admin_shauntel")
@@ -45,14 +57,14 @@ public class CoachController {
     @GetMapping("/coach/register")
     public String showCoachCreatedForm(Model model){
         model.addAttribute("coach", new Coach());
-        return "coach_form";
+        return "login_coach";
     }
 
     @PostMapping("/coach/register")
     public String processCoachSignUp(
             @RequestParam String name,
             @RequestParam String surname,
-            @RequestParam String url,
+            @RequestParam MultipartFile profilePicture,
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String bio,
@@ -69,78 +81,232 @@ public class CoachController {
         coach.setSurname(surname);
         coach.setEmail(email);
         coach.setPassword(password);
-        coach.setProfilePicture(url);
         coach.setBio(bio);
         coach.setExpertise(expertise);
         coach.setCreatedAt(new Date());
         coach.setUpdatedAt(new Date());
 
-        coachRepository.save(coach);
+        // Save coach first to get ID
+        Coach savedCoach = coachRepository.save(coach);
 
-        redirectAttributes.addFlashAttribute("success", "Coach registration successful!");
-        return "redirect:/coach/register";
-    }
-
-    // Show form for editing an existing coach
-    @GetMapping("/coach/update/{id}")
-    public String editCoach(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            Coach coach = coachRepository.findByCoachId(id);
-
-            model.addAttribute("coach", coach);
-            return "edit_coach";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/admin_shauntel";
-        }
-    }
-
-    // Process form submission for updating a coach
-    @PostMapping("/coach/update/{id}")
-    public String updateCoach(
-            @PathVariable("id") Integer id,
-            @ModelAttribute("coach") Coach coach,
-            RedirectAttributes redirectAttributes) {
-        try {
-            // Get existing coach data
-            Coach existingCoach = coachRepository.findByCoachId(id);
-
-            // Update fields
-            existingCoach.setName(coach.getName());
-            existingCoach.setSurname(coach.getSurname());
-            existingCoach.setEmail(coach.getEmail());
-            existingCoach.setProfilePicture(coach.getProfilePicture());
-            existingCoach.setBio(coach.getBio());
-            existingCoach.setExpertise(coach.getExpertise());
-
-            // Only update password if a new one was provided
-            if (coach.getPassword() != null && !coach.getPassword().isEmpty()) {
-                existingCoach.setPassword(coach.getPassword());
+        // Handle profile picture upload
+        if (!profilePicture.isEmpty()) {
+            File directory = new File(UPLOAD_DIR);
+            if (!directory.exists()) {
+                directory.mkdirs();
             }
 
-            // Update timestamp
-            existingCoach.setUpdatedAt(new Date());
+            String fileExtension = getFileExtension(profilePicture.getOriginalFilename());
+            String fileName = "coach_" + savedCoach.getCoachId() + "_" + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
 
-            // Save the updated coach
-            coachRepository.save(existingCoach);
+            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+            Files.write(filePath, profilePicture.getBytes());
 
-            redirectAttributes.addFlashAttribute("success", "Coach updated successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error updating coach: " + e.getMessage());
+            String dbFilePath = "/images/coaches/" + fileName;
+            savedCoach.setProfilePicture(dbFilePath);
+            coachRepository.save(savedCoach);
         }
-        return "redirect:/admin_shauntel";
+
+        redirectAttributes.addFlashAttribute("success", "Registration successful! Please log in.");
+        return "redirect:/login/coach";
     }
 
-    // Delete a coach
-    @GetMapping("/coach/delete/{id}")
-    public String deleteCoach(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            Coach coach = coachRepository.findByCoachId(id);
-            coachRepository.delete(coach);
-            redirectAttributes.addFlashAttribute("success", "Coach deleted successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error deleting coach: " + e.getMessage());
+    // NEW: Helper method to get file extension
+    private String getFileExtension(String filename) {
+        if (filename == null) {
+            return "";
         }
-        return "redirect:/admin_shauntel";
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex < 0) {
+            return "";
+        }
+        return filename.substring(dotIndex);
+    }
+
+    // ===========================
+    // NEW LOGIN LOGIC FOR COACHES
+    // ===========================
+
+    @PostMapping("/login/coach/dashboard")
+    public String processCoachLogin(
+            @RequestParam String email,
+            @RequestParam String password,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Optional<Coach> coach = coachRepository.findByEmail(email);
+
+        // Check if the coach is not found
+        if (coach.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Email not found. Please check your email or sign up.");
+            return "redirect:/login/coach";
+        }
+
+        // Check if the password is correct
+        if (!coach.get().getPassword().equals(password)) {
+            redirectAttributes.addFlashAttribute("error", "Incorrect password. Please try again.");
+            return "redirect:/login/coach";
+        }
+
+        // Store coach in session
+        session.setAttribute("loggedInCoach", coach.get());
+
+        return "redirect:/coach/dashboard";
+    }
+
+    @GetMapping("/coach/dashboard")
+    public String showCoachDashboard(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        Coach loggedInCoach = (Coach) session.getAttribute("loggedInCoach");
+
+        if (loggedInCoach == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to access your dashboard.");
+            return "redirect:/login/coach";
+        }
+
+        // Get coach's wellness content
+        List<WellnessContent> recentContent = wellnessContentService.getContentByCoach(loggedInCoach);
+        Long contentCount = wellnessContentService.countContentByCoach(loggedInCoach);
+
+        model.addAttribute("coach", loggedInCoach);
+        model.addAttribute("recentContent", recentContent);
+        model.addAttribute("contentCount", contentCount);
+
+        return "coach_dashboard";
+    }
+
+    @PostMapping("/coach/admin/update/'")
+    public String updateCoach(
+            @RequestParam String name,
+            @RequestParam String surname,
+            @RequestParam String email,
+            @RequestParam String bio,
+            @RequestParam String expertise,
+            @RequestParam(required = false) MultipartFile profilePicture,
+            @RequestParam(required = false) String currentPassword,
+            @RequestParam(required = false) String newPassword,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) throws IOException {
+
+        Coach loggedInCoach = (Coach) session.getAttribute("loggedInCoach");
+
+        if (loggedInCoach == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to update your profile.");
+            return "redirect:/login/coach";
+        }
+
+        // Update coach information
+        loggedInCoach.setName(name);
+        loggedInCoach.setSurname(surname);
+        loggedInCoach.setEmail(email);
+        loggedInCoach.setBio(bio);
+        loggedInCoach.setExpertise(expertise);
+        loggedInCoach.setUpdatedAt(new Date());
+
+        // Handle password change if requested
+        if (currentPassword != null && !currentPassword.isEmpty() && newPassword != null && !newPassword.isEmpty()) {
+            if (!loggedInCoach.getPassword().equals(currentPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Current password is incorrect.");
+                return "redirect:/coach/dashboard";
+            }
+            loggedInCoach.setPassword(newPassword);
+        }
+
+        // Handle profile picture update if provided
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            File directory = new File(UPLOAD_DIR);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String fileExtension = getFileExtension(profilePicture.getOriginalFilename());
+            String fileName = "coach_" + loggedInCoach.getCoachId() + "_" + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
+
+            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+            Files.write(filePath, profilePicture.getBytes());
+
+            String dbFilePath = "/images/coaches/" + fileName;
+            loggedInCoach.setProfilePicture(dbFilePath);
+        }
+
+        // Save updated coach
+        coachRepository.save(loggedInCoach);
+
+        // Update session
+        session.setAttribute("loggedInCoach", loggedInCoach);
+
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+        return "redirect:/coach/dashboard";
+    }
+
+
+    @PostMapping("/coach/update")
+    public String updateCoachProfile(
+            @RequestParam String name,
+            @RequestParam String surname,
+            @RequestParam String email,
+            @RequestParam String bio,
+            @RequestParam String expertise,
+            @RequestParam(required = false) MultipartFile profilePicture,
+            @RequestParam(required = false) String currentPassword,
+            @RequestParam(required = false) String newPassword,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) throws IOException {
+
+        Coach loggedInCoach = (Coach) session.getAttribute("loggedInCoach");
+
+        if (loggedInCoach == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to update your profile.");
+            return "redirect:/login/coach";
+        }
+
+        // Update coach information
+        loggedInCoach.setName(name);
+        loggedInCoach.setSurname(surname);
+        loggedInCoach.setEmail(email);
+        loggedInCoach.setBio(bio);
+        loggedInCoach.setExpertise(expertise);
+        loggedInCoach.setUpdatedAt(new Date());
+
+        // Handle password change if requested
+        if (currentPassword != null && !currentPassword.isEmpty() && newPassword != null && !newPassword.isEmpty()) {
+            if (!loggedInCoach.getPassword().equals(currentPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Current password is incorrect.");
+                return "redirect:/coach/dashboard";
+            }
+            loggedInCoach.setPassword(newPassword);
+        }
+
+        // Handle profile picture update if provided
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            File directory = new File(UPLOAD_DIR);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String fileExtension = getFileExtension(profilePicture.getOriginalFilename());
+            String fileName = "coach_" + loggedInCoach.getCoachId() + "_" + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
+
+            Path filePath = Paths.get(UPLOAD_DIR + fileName);
+            Files.write(filePath, profilePicture.getBytes());
+
+            String dbFilePath = "/images/coaches/" + fileName;
+            loggedInCoach.setProfilePicture(dbFilePath);
+        }
+
+        // Save updated coach
+        coachRepository.save(loggedInCoach);
+
+        // Update session
+        session.setAttribute("loggedInCoach", loggedInCoach);
+
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+        return "redirect:/coach/dashboard";
+    }
+
+    @GetMapping("/logout/coach")
+    public String logoutCoach(HttpSession session, RedirectAttributes redirectAttributes) {
+        session.invalidate();
+        redirectAttributes.addFlashAttribute("success", "You have been successfully logged out.");
+        return "redirect:/login/coach";
     }
 }

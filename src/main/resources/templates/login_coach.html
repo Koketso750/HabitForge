@@ -174,7 +174,7 @@
   <div class="row justify-content-center">
     <div class="col-md-6">
       <div class="form-container">
-        <h2 class="display-4 text-center mb-4"><i class="bi bi-box-arrow-in-right"></i> Login</h2>
+        <h2 class="display-4 text-center mb-4"><i class="bi bi-box-arrow-in-right"></i> Login As Coach</h2>
         <!-- Display error/success messages -->
         <div th:if="${error}" class="alert alert-danger" role="alert">
           <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
@@ -182,7 +182,7 @@
         <div th:if="${success}" class="alert alert-success" role="alert">
           <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
         </div>
-        <form th:action="@{/login/dashboard}" method="post">
+        <form th:action="@{/login/coach/dashboard}" method="post">
           <!-- Email -->
           <div class="form-group">
             <label for="email" class="form-label">Email</label>

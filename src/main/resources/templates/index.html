@@ -182,8 +182,14 @@
                         <li><a class="dropdown-item" th:href="@{/admin_shauntel}">Secondary Admin</a></li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/login}">Login</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Login
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="loginDropdown">
+                        <li><a class="dropdown-item" th:href="@{/login/user}">Login as User</a></li>
+                        <li><a class="dropdown-item" th:href="@{/login/coach}">Login as Coach</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Wellness Content</a>
@@ -266,7 +272,7 @@
             <div class="modal-body">
                 <p>Choose your role to get started:</p>
                 <div class="d-grid gap-3">
-                    <a href="#" class="btn btn-primary btn-lg">
+                    <a th:href="@{/user/sign/up}" class="btn btn-primary btn-lg">
                         <i class="bi bi-person"></i> Sign Up as User
                     </a>
                     <a th:href="@{/coach/sign/up}" class="btn btn-primary btn-lg">

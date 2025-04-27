@@ -10,11 +10,14 @@ public class CoachService {
 
     @Autowired private CoachRepository coachRepository;
 
-    public boolean emailExists(String email) {
-        return CoachRepository.findByEmail(email) != null;
-    }
         public List<Coach> listAll(){
-            return (List<Coach>) coachRepository.findAll();
-  }
+            return (List<Coach>)
+                    coachRepository.findAll();
+        }
+
+    public boolean emailExists(String email) {
+        // Use the repository to check if a coach with the provided email exists
+        return coachRepository.findByEmail(email).isPresent();
     }
+}
 

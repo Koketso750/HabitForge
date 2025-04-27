@@ -3,10 +3,10 @@ package swp.habitforge.habitforge.coach;
 import jakarta.transaction.Transactional;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.Optional;
+
 public interface CoachRepository extends CrudRepository<Coach, Integer> {
-    static Coach findByEmail(String email) {
-        return null;
-    }
+    Optional<Coach> findByEmail(String email);
 
     @Transactional
     void deleteByCoachId(Integer id);
