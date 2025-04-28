@@ -17,6 +17,9 @@ public class Notification {
     private Date createdAt;
     private Date updatedAt;
 
+    @Column(name = "`read`")
+    private boolean read;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -92,4 +95,13 @@ public class Notification {
     public void setTask(Task task) {
         this.task = task;
     }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
+    }
+
 }

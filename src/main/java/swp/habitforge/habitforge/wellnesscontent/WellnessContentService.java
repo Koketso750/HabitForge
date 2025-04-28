@@ -22,4 +22,8 @@ public class WellnessContentService {
     public List<WellnessContent> listAll() {
         return (List<WellnessContent>) wellnessContentRepository.findAll();
     }
+
+    public List<WellnessContent> getAllContent() {
+        return (List<WellnessContent>) wellnessContentRepository.findAll();
+    }
 }

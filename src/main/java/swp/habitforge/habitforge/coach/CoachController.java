@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.habitforge.habitforge.feedback.Feedback;
+import swp.habitforge.habitforge.feedback.FeedbackService;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContent;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContentService;
 
@@ -15,10 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 public class CoachController {
@@ -26,6 +25,7 @@ public class CoachController {
     @Autowired private CoachRepository coachRepository;
     @Autowired private CoachService coachService;
     @Autowired private WellnessContentService wellnessContentService;
+    @Autowired private FeedbackService feedbackService;
 
 
     // Directory where profile pictures will be stored
@@ -163,13 +163,33 @@ public class CoachController {
             return "redirect:/login/coach";
         }
 
-        // Get coach's wellness content
+        List<Feedback> feedbackList = feedbackService.getFeedbackForCoachWithUser(loggedInCoach);
         List<WellnessContent> recentContent = wellnessContentService.getContentByCoach(loggedInCoach);
+
+        // Calculate average ratings
+        Map<Long, Double> averageRatings = new HashMap<>();
+        for (WellnessContent content : recentContent) {
+            List<Feedback> contentFeedback = content.getFeedback();
+            if (contentFeedback != null && !contentFeedback.isEmpty()) {
+                double avgRating = contentFeedback.stream()
+                        .map(Feedback::getRating)
+                        .filter(Objects::nonNull)
+                        .mapToInt(Integer::intValue)
+                        .average()
+                        .orElse(0.0);
+                averageRatings.put(content.getContentId().longValue(), avgRating);
+            } else {
+                averageRatings.put(content.getContentId().longValue(), 0.0);
+            }
+        }
+
         Long contentCount = wellnessContentService.countContentByCoach(loggedInCoach);
 
         model.addAttribute("coach", loggedInCoach);
         model.addAttribute("recentContent", recentContent);
         model.addAttribute("contentCount", contentCount);
+        model.addAttribute("feedbackList", feedbackList);
+        model.addAttribute("averageRatings", averageRatings);
 
         return "coach_dashboard";
     }

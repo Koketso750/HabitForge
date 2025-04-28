@@ -7,6 +7,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.habitforge.habitforge.notification.Notification;
+import swp.habitforge.habitforge.notification.NotificationService;
+import swp.habitforge.habitforge.task.Task;
+import swp.habitforge.habitforge.task.TaskService;
+import swp.habitforge.habitforge.wellnesscontent.WellnessContent;
+import swp.habitforge.habitforge.wellnesscontent.WellnessContentService;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +32,15 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private WellnessContentService wellnessContentService;
+
+    @Autowired
+    private TaskService taskService;
 
 
     // Directory where profile pictures will be stored
@@ -250,11 +265,33 @@ public class UserController {
 
         if (loggedInUser == null) {
             redirectAttributes.addFlashAttribute("error", "Please log in to access your dashboard.");
-            return "redirect:/login";
+            return "redirect:/login/user";
         }
 
-        // Add user to model for dashboard display
+        // Get user's tasks
+        List<Task> tasks = taskService.getTasksByUser(loggedInUser);
+        long taskCount = tasks.stream().filter(task -> !task.getCompleted()).count();
+        long completedTaskCount = tasks.stream().filter(Task::getCompleted).count();
+
+        // Calculate progress percentage
+        int progressPercentage = tasks.isEmpty() ? 0 : (int) ((completedTaskCount * 100) / tasks.size());
+
+        // Get user's notifications
+        List<Notification> notifications = notificationService.getUnreadNotificationsByUser(loggedInUser);
+        long notificationCount = notifications.size();
+
+        // Get all wellness content from all coaches
+        List<WellnessContent> wellnessContent = wellnessContentService.getAllContent();
+
+        // Add all attributes to the model
         model.addAttribute("user", loggedInUser);
+        model.addAttribute("tasks", tasks);
+        model.addAttribute("taskCount", taskCount);
+        model.addAttribute("completedTaskCount", completedTaskCount);
+        model.addAttribute("progressPercentage", progressPercentage);
+        model.addAttribute("notifications", notifications);
+        model.addAttribute("notificationCount", notificationCount);
+        model.addAttribute("wellnessContent", wellnessContent);
 
         return "user_dashboard";
     }

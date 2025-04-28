@@ -44,7 +44,7 @@ public class WellnessContentController {
         model.addAttribute("contentList", contentList);
         model.addAttribute("coach", loggedInCoach);
 
-        return "coach_content";
+        return "coach_dashboard";
     }
 
     @PostMapping("/coach/content/upload")
@@ -52,7 +52,7 @@ public class WellnessContentController {
             @RequestParam("contentTitle") String contentTitle,
             @RequestParam("contentType") String contentType,
             @RequestParam("contentDescription") String contentDescription,
-            @RequestParam("contentFile") MultipartFile contentFile,
+            @RequestParam("contentUrl") String contentUrl,
             HttpSession session,
             RedirectAttributes redirectAttributes) throws IOException {
 
@@ -71,28 +71,8 @@ public class WellnessContentController {
         content.setCoach(loggedInCoach);
         content.setCreatedAt(new Date());
         content.setUpdatedAt(new Date());
+        content.setContentUrl(contentUrl);
 
-        // Process file upload
-        if (!contentFile.isEmpty()) {
-            // Create directory if it doesn't exist
-            File directory = new File(UPLOAD_DIR);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            // Generate unique filename
-            String fileExtension = getFileExtension(contentFile.getOriginalFilename());
-            String fileName = "content_" + UUID.randomUUID().toString() + fileExtension;
-            Path filePath = Paths.get(UPLOAD_DIR + fileName);
-
-            // Save file
-            Files.write(filePath, contentFile.getBytes());
-
-            // Set content URL and file type
-            String contentUrl = "/content/" + fileName;
-            content.setContentUrl(contentUrl);
-            content.setContentFileType(fileExtension.substring(1)); // Remove the dot from extension
-        }
 
         // Save content to database
         wellnessContentRepository.save(content);
@@ -125,18 +105,9 @@ public class WellnessContentController {
         WellnessContent content = wellnessContentRepository.findById(contentId).orElse(null);
 
         if (content != null && content.getCoach().getCoachId().equals(loggedInCoach.getCoachId())) {
-            // Delete the file if it exists
-            if (content.getContentUrl() != null && !content.getContentUrl().isEmpty()) {
-                String filePath = "src/main/resources/static" + content.getContentUrl();
-                try {
-                    Files.deleteIfExists(Paths.get(filePath));
-                } catch (IOException e) {
-                    // Log error but continue with database deletion
-                    System.err.println("Could not delete file: " + e.getMessage());
-                }
-            }
 
             wellnessContentRepository.deleteById(contentId);
+
             redirectAttributes.addFlashAttribute("success", "Content deleted successfully!");
         } else {
             redirectAttributes.addFlashAttribute("error", "You are not authorized to delete this content.");

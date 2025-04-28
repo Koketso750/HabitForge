@@ -10,18 +10,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
-        /* Autumn Nature Theme */
         :root {
-            --primary-green: #4CAF50; /* Fresh green */
-            --secondary-brown: #8B4513; /* Warm brown */
-            --accent-orange: #FFA500; /* Autumn orange */
-            --background-beige: #F5F5DC; /* Light beige */
-            --text-dark: #2E2E2E; /* Dark gray for text */
+            --primary-green: #4CAF50;
+            --secondary-brown: #8B4513;
+            --accent-orange: #FFA500;
+            --background-beige: #F5F5DC;
+            --text-dark: #2E2E2E;
         }
 
         body {
-            background-color: #D6C7B1; /* Darker beige background */
-            color: var(--text-dark); /* Retain the text color */
+            background-color: var(--background-beige);
+            color: var(--text-dark);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
@@ -40,11 +39,60 @@
         .btn-primary {
             background-color: var(--secondary-brown);
             border-color: var(--secondary-brown);
+            color: white;
         }
 
         .btn-primary:hover {
             background-color: var(--accent-orange);
             border-color: var(--accent-orange);
+        }
+
+        .dashboard-header {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--accent-orange);
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--secondary-brown);
+        }
+
+        .content-card {
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--primary-green);
+        }
+
+        .content-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card {
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            color: var(--accent-orange);
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: var(--secondary-brown);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .footer {
@@ -62,109 +110,20 @@
             color: white;
         }
 
-        /* Dashboard Styling */
-        .dashboard-header {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid var(--accent-orange);
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
         }
 
-        .profile-card {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border-top: 3px solid var(--secondary-brown);
+        .task-completed {
+            text-decoration: line-through;
+            color: #6c757d;
         }
 
-        .profile-img {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid var(--secondary-brown);
-            margin: 0 auto;
-            display: block;
-        }
-
-        .nav-tabs .nav-link {
-            color: black; /* Set text color to black */
-            font-weight: 500;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: black; /* White text for active tab */
-            background-color: var(--accent-orange); /* Orange background for active tab */
-            border-color: var(--secondary-brown) var(--secondary-brown) var(--background-beige);
-            border-width: 2px;
-        }
-
-        .nav-tabs .nav-link:hover:not(.active) {
-            color: black; /* Black text on hover */
-            border-color: transparent;
-        }
-
-        .table {
-            background-color: white;
-        }
-
-        .table thead {
+        .progress-bar {
             background-color: var(--secondary-brown);
-            color: white;
-        }
-
-        .table th {
-            border-bottom: 2px solid var(--accent-orange);
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(139, 69, 19, 0.1);
-        }
-
-        .badge-orange {
-            background-color: var(--accent-orange);
-            color: white;
-        }
-
-        .badge-brown {
-            background-color: var(--secondary-brown);
-            color: white;
-        }
-
-        /* Breadcrumb Styling */
-        .breadcrumb {
-            --bs-breadcrumb-divider-color: var(--secondary-brown);
-            --bs-breadcrumb-item-active-color: var(--accent-orange);
-            background-color: transparent;
-            padding: 0.75rem 0;
-        }
-
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: var(--bs-breadcrumb-divider, "›");
-            color: var(--secondary-brown);
-            font-weight: bold;
-            padding: 0 0.5rem;
-        }
-
-        .text-brown {
-            color: var(--secondary-brown);
-        }
-
-        .text-orange {
-            color: var(--accent-orange);
-        }
-
-        .breadcrumb-item a {
-            color: var(--secondary-brown);
-            text-decoration: none;
-        }
-
-        .breadcrumb-item a:hover {
-            color: var(--accent-orange);
         }
     </style>
 </head>
@@ -182,16 +141,21 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    <a class="nav-link active" th:href="@{/user/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-journal-text"></i> Habits</a>
+                    <a class="nav-link" href="#tasks-section"><i class="bi bi-list-check"></i> My Tasks</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Progress</a>
+                    <a class="nav-link" href="#content-section"><i class="bi bi-collection-play"></i> Wellness Content</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-gear"></i> Settings</a>
+                <li class="nav-item position-relative">
+                    <a class="nav-link" href="#notifications-section">
+                        <i class="bi bi-bell"></i> Notifications
+                        <span th:if="${notifications != null && !notifications.isEmpty()}"
+                              class="badge bg-danger notification-badge rounded-pill"
+                              th:text="${notifications.size()}"></span>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -201,130 +165,280 @@
     </div>
 </nav>
 
-<!-- Breadcrumb Navigation -->
-<nav aria-label="breadcrumb" class="bg-light py-2">
-    <div class="container">
-        <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item">
-                <a th:href="@{/}" class="text-decoration-none">
-                    <i class="bi bi-house-door"></i> Home
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                <i class="bi bi-person"></i> User Dashboard
-            </li>
-        </ol>
-    </div>
-</nav>
-
 <!-- Main Content -->
 <div class="container my-5">
-    <!-- Dashboard Header -->
+    <!-- User Profile Header -->
     <div class="dashboard-header">
         <div class="row align-items-center">
-            <div class="col-md-2 text-center">
+            <div class="col-md-3 text-center">
                 <img th:src="@{${user.profilePicture}}" alt="Profile Picture" class="profile-img">
             </div>
-            <div class="col-md-10">
-                <h1 class="display-4 mb-3">Welcome, <span th:text="${user.name}" class="text-orange"></span>!</h1>
-                <p class="lead mb-0">Member since <span th:text="${#dates.format(user.createdAt, 'MMMM yyyy')}" class="text-brown"></span></p>
+            <div class="col-md-9">
+                <h1 class="display-4 mb-2">Welcome, <b><span th:text="${user.name + ' ' + user.surname}" class="text-orange"></span></b></h1>
+                <p class="text-muted">Member since <span th:text="${#dates.format(user.createdAt, 'MMMM yyyy')}"></span></p>
             </div>
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
-                <i class="bi bi-person"></i> Profile
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="habits-tab" data-bs-toggle="tab" data-bs-target="#habits" type="button" role="tab" aria-controls="habits" aria-selected="false">
-                <i class="bi bi-journal-check"></i> My Habits
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab" aria-controls="progress" aria-selected="false">
-                <i class="bi bi-bar-chart"></i> Progress
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">
-                <i class="bi bi-gear"></i> Settings
-            </button>
-        </li>
-    </ul>
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${taskCount != null ? taskCount : 0}">0</div>
+                <div class="stat-label">Active Tasks</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${completedTaskCount != null ? completedTaskCount : 0}">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${notificationCount != null ? notificationCount : 0}">0</div>
+                <div class="stat-label">Notifications</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${progressPercentage != null ? progressPercentage + '%' : '0%'}">0%</div>
+                <div class="stat-label">Overall Progress</div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Tab Content -->
-    <div class="tab-content" id="dashboardTabsContent">
-        <!-- Profile Tab -->
-        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="profile-card">
-                <h3 class="mb-4"><i class="bi bi-person-badge"></i> Personal Information</h3>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <tbody>
-                        <tr>
-                            <th>Username</th>
-                            <td th:text="${user.username}"></td>
-                        </tr>
-                        <tr>
-                            <th>Full Name</th>
-                            <td th:text="${user.name + ' ' + user.surname}"></td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td th:text="${user.email}"></td>
-                        </tr>
-                        <tr>
-                            <th>Account Created</th>
-                            <td th:text="${#dates.format(user.createdAt, 'MMMM dd, yyyy')}"></td>
-                        </tr>
-                        </tbody>
-                    </table>
+    <!-- Tasks Section -->
+    <div id="tasks-section" class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-list-check"></i> My Tasks</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                <i class="bi bi-plus"></i> Add Task
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${tasks == null || tasks.isEmpty()}" class="text-center py-3">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i> You don't have any tasks yet. Add one to get started!
+                    </div>
+                </div>
+
+                <div th:if="${tasks != null && !tasks.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Due Date</th>
+                                <th>Habit Type</th>
+                                <th>Frequency</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="task : ${tasks}" th:class="${task.completed} ? 'task-completed' : ''">
+                                <td th:text="${task.taskName}"></td>
+                                <td th:text="${#dates.format(task.dueDate, 'MMM dd, yyyy')}"></td>
+                                <td>
+                                        <span class="badge"
+                                              th:class="${task.habitType == 'Mental' ? 'bg-success' :
+                                                         task.habitType == 'Physical' ? 'bg-primary' :
+                                                         task.habitType == 'Emotional' ? 'bg-warning' : 'bg-info'}">
+                                            <span th:text="${task.habitType}"></span>
+                                        </span>
+                                </td>
+                                <td th:text="${task.habitFrequency} + 'x/week'"></td>
+                                <td>
+                                    <span th:if="${task.completed}" class="badge bg-success">Completed</span>
+                                    <span th:unless="${task.completed}" class="badge bg-warning">Pending</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-success"
+                                                th:if="${!task.completed}"
+                                                th:onclick="'completeTask(' + ${task.taskId} + ')'">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                th:onclick="'deleteTask(' + ${task.taskId} + ')'">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mt-4">
+                        <h5>Overall Progress</h5>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar" role="progressbar"
+                                 th:attr="aria-valuenow=${progressPercentage}, style='width: ' + ${progressPercentage} + '%'"
+                                 th:text="${progressPercentage} + '%'">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Habits Tab -->
-        <div class="tab-pane fade" id="habits" role="tabpanel" aria-labelledby="habits-tab">
-            <div class="profile-card">
-                <h3 class="mb-4"><i class="bi bi-journal-check"></i> My Habits</h3>
+    <!-- Wellness Content Section -->
+    <div id="content-section" class="mb-5">
+        <h2 class="mb-4"><i class="bi bi-collection-play"></i> Wellness Content</h2>
+
+        <div class="row">
+            <div th:if="${wellnessContent == null || wellnessContent.isEmpty()}" class="col-12 text-center py-5">
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> You currently have no active habits. <a href="#" class="alert-link">Start building new habits now!</a>
+                    <i class="bi bi-info-circle me-2"></i> No wellness content available at the moment.
+                </div>
+            </div>
+
+            <div th:each="content : ${wellnessContent}" class="col-md-4 mb-4">
+                <div class="card content-card h-100">
+                    <div class="ratio ratio-16x9">
+                        <iframe th:src="${#strings.replace(content.contentUrl, 'watch?v=', 'embed/')}"
+                                allowfullscreen style="border:none;"></iframe>
+                    </div>
+                    <div class="card-body">
+                        <span th:class="${'badge ' + (content.contentType == 'Mental' ? 'bg-success' :
+                                     content.contentType == 'Physical' ? 'bg-primary' :
+                                     content.contentType == 'Emotional' ? 'bg-warning' : 'bg-info')} + ' mb-2'"
+                              th:text="${content.contentType}"></span>
+                        <h5 th:text="${content.contentTitle}"></h5>
+                        <p class="text-muted" th:text="${content.contentDescription}"></p>
+                        <p class="text-muted small">
+                            <i class="bi bi-person"></i> Coach:
+                            <span th:text="${content.coach.name + ' ' + content.coach.surname}"></span>
+                        </p>
+
+                        <!-- Feedback Form -->
+                        <form th:action="@{'/feedback/submit/' + ${content.contentId}}" method="post">
+                            <div class="rating d-flex flex-row justify-content-between">
+                                <div class="text-center">
+                                    <input type="radio" id="star5-${content.contentId}" name="rating" value="5" required>
+                                    <label for="star5-${content.contentId}">
+                                        <i class="bi bi-star-fill"></i><br>5
+                                    </label>
+                                </div>
+                                <div class="text-center">
+                                    <input type="radio" id="star4-${content.contentId}" name="rating" value="4">
+                                    <label for="star4-${content.contentId}">
+                                        <i class="bi bi-star-fill"></i><br>4
+                                    </label>
+                                </div>
+                                <div class="text-center">
+                                    <input type="radio" id="star3-${content.contentId}" name="rating" value="3">
+                                    <label for="star3-${content.contentId}">
+                                        <i class="bi bi-star-fill"></i><br>3
+                                    </label>
+                                </div>
+                                <div class="text-center">
+                                    <input type="radio" id="star2-${content.contentId}" name="rating" value="2">
+                                    <label for="star2-${content.contentId}">
+                                        <i class="bi bi-star-fill"></i><br>2
+                                    </label>
+                                </div>
+                                <div class="text-center">
+                                    <input type="radio" id="star1-${content.contentId}" name="rating" value="1">
+                                    <label for="star1-${content.contentId}">
+                                        <i class="bi bi-star-fill"></i><br>1
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <textarea class="form-control" name="feedbackText" rows="2"
+                                          placeholder="Your feedback (optional)"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-send"></i> Submit Feedback
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Progress Tab -->
-        <div class="tab-pane fade" id="progress" role="tabpanel" aria-labelledby="progress-tab">
-            <div class="profile-card">
-                <h3 class="mb-4"><i class="bi bi-bar-chart"></i> My Progress</h3>
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> Progress tracking will be available once you start building habits.
+    <!-- Notifications Section -->
+    <div id="notifications-section" class="mb-5">
+        <h2 class="mb-4"><i class="bi bi-bell"></i> Notifications</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${notifications == null || notifications.isEmpty()}" class="text-center py-3">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i> No notifications at this time.
+                    </div>
+                </div>
+
+                <div th:each="notification : ${notifications}" class="d-flex align-items-start mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-bell-fill text-warning fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 th:text="${notification.notificationText}"></h6>
+                        <small class="text-muted" th:text="${#dates.format(notification.notificationDate, 'MMM dd, yyyy hh:mm a')}"></small>
+                        <div th:if="${notification.task != null}" class="mt-1">
+                            <small>Related to task: <span th:text="${notification.task.taskName}"></span></small>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary"
+                            th:onclick="'markNotificationAsRead(' + ${notification.notificationId} + ')'">
+                        <i class="bi bi-check"></i> Mark as read
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Settings Tab -->
-        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-            <div class="profile-card">
-                <h3 class="mb-4"><i class="bi bi-gear"></i> Account Settings</h3>
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="bi bi-pencil"></i> Edit Profile Information
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="bi bi-lock"></i> Change Password
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="bi bi-image"></i> Update Profile Picture
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action text-danger">
-                        <i class="bi bi-trash"></i> Delete Account
-                    </a>
-                </div>
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel"><i class="bi bi-plus-circle"></i> Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm" th:action="@{/task/create}" method="post">
+                    <div class="mb-3">
+                        <label for="taskName" class="form-label">Task Name</label>
+                        <input type="text" class="form-control" id="taskName" name="taskName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="taskDescription" name="taskDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dueDate" class="form-label">Due Date</label>
+                        <input type="date" class="form-control" id="dueDate" name="dueDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="habitType" class="form-label">Habit Type</label>
+                        <select class="form-select" id="habitType" name="habitType" required>
+                            <option value="">Select type</option>
+                            <option value="Mental">Mental Health</option>
+                            <option value="Physical">Physical Fitness</option>
+                            <option value="Emotional">Emotional Wellness</option>
+                            <option value="SelfCare">Self-Care</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="habitFrequency" class="form-label">Frequency (times per week)</label>
+                        <input type="number" class="form-control" id="habitFrequency" name="habitFrequency" min="1" max="7" value="1">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Task</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -333,15 +447,97 @@
 <!-- Footer -->
 <footer class="footer text-center mt-5">
     <div class="container">
-        <p class="mb-0">&copy; 2025 HabitForge. All rights reserved.</p>
-        <p>
-            <a href="#" class="me-3">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-        </p>
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="bi bi-heart-fill"></i> HabitForge</h5>
+                <p>Helping you build healthy habits and achieve overall wellness.</p>
+            </div>
+            <div class="col-md-3">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white">About Us</a></li>
+                    <li><a href="#" class="text-white">Wellness Resources</a></li>
+                    <li><a href="#" class="text-white">Support</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Connect</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#" class="text-white"><i class="bi bi-envelope"></i> help@habitforge.com</a></li>
+                    <li><a href="#" class="text-white"><i class="bi bi-telephone"></i> (123) 456-7890</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <p class="mb-0">&copy; 2025 HabitForge. All rights reserved.</p>
+        </div>
     </div>
 </footer>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Function to complete a task
+    function completeTask(taskId) {
+        if (confirm('Mark this task as completed?')) {
+            fetch('/task/complete/' + taskId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Error completing task');
+                    }
+                });
+        }
+    }
+
+    // Function to delete a task
+    function deleteTask(taskId) {
+        if (confirm('Are you sure you want to delete this task?')) {
+            fetch('/task/delete/' + taskId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting task');
+                    }
+                });
+        }
+    }
+
+    // Function to mark notification as read
+    function markNotificationAsRead(notificationId) {
+        fetch('/notification/mark-as-read/' + notificationId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Error marking notification as read');
+                }
+            });
+    }
+
+    // Initialize date picker for due date
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dueDate').min = today;
+    });
+</script>
 </body>
 </html>

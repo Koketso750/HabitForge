@@ -2,8 +2,11 @@ package swp.habitforge.habitforge.wellnesscontent;
 
 import jakarta.persistence.*;
 import swp.habitforge.habitforge.coach.Coach;
+import swp.habitforge.habitforge.feedback.Feedback;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "wellness_content")
@@ -13,7 +16,10 @@ public class WellnessContent {
     private Integer contentId;
     private String contentType;
     private String contentTitle;
+
+    @Column(length = 5000)
     private String contentDescription;
+
     private String contentUrl;
     private String contentFileType;
     private Date createdAt;
@@ -22,6 +28,29 @@ public class WellnessContent {
     @ManyToOne
     @JoinColumn(name = "coach_id")
     private Coach coach;
+
+    public List<Feedback> getFeedback() {
+        return feedback;
+    }
+
+    public WellnessContent(String contentType, String contentTitle, String contentDescription, String contentUrl, String contentFileType, Date createdAt, Date updatedAt, Coach coach, List<Feedback> feedback) {
+        this.contentType = contentType;
+        this.contentTitle = contentTitle;
+        this.contentDescription = contentDescription;
+        this.contentUrl = contentUrl;
+        this.contentFileType = contentFileType;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.coach = coach;
+        this.feedback = feedback;
+    }
+
+    public void setFeedback(List<Feedback> feedback) {
+        this.feedback = feedback;
+    }
+
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Feedback> feedback = new ArrayList<>();
 
     public WellnessContent() {}
 

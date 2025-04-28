@@ -116,6 +116,17 @@
         .footer a:hover {
             color: white;
         }
+
+        /* Add this new style for the settings tab */
+        #settings-tab.nav-link {
+            background-color: var(--secondary-brown);
+            color: white !important;
+        }
+
+        #settings-tab.nav-link:hover {
+            background-color: var(--accent-orange);
+            color: white !important;
+        }
     </style>
 </head>
 <body>
@@ -157,7 +168,7 @@
                 <img th:src="@{${coach.profilePicture}}" alt="Profile Picture" class="profile-img">
             </div>
             <div class="col-md-9">
-                <h1 class="display-4 mb-2">Coach <span th:text="${coach.name + ' ' + coach.surname}" class="text-orange"></span></h1>
+                <h1 class="display-4 mb-2">Coach: <b><span th:text="${coach.name + ' ' + coach.surname}" class="text-orange"></span></b></h1>
                 <span class="expertise-badge rounded-pill mb-3" th:text="${coach.expertise}"></span>
                 <p class="text-muted">Member since <span th:text="${#dates.format(coach.createdAt, 'MMMM yyyy')}"></span></p>
             </div>
@@ -172,6 +183,134 @@
                 <div class="stat-label">Content Uploads</div>
             </div>
         </div>
+    </div>
+
+    <!-- Add Settings to the tab list -->
+    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+        <!-- Previous tabs remain -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
+                <i class="bi bi-gear"></i> Settings
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="dashboardTabsContent">
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel">
+            <div class="profile-card">
+                <h3 class="mb-4"><i class="bi bi-gear"></i> Account Settings</h3>
+
+                <form class="settings-form" th:action="@{/coach/update}" method="post" enctype="multipart/form-data">
+                    <!-- Profile Picture Update -->
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div class="d-flex align-items-center">
+                            <img th:src="@{${coach.profilePicture}}" class="profile-img me-4" width="100">
+                            <div>
+                                <input type="file" class="form-control" name="profilePicture" accept="image/*">
+                                <small class="text-muted">Recommended size: 500x500 pixels</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="name">First Name</label>
+                            <input type="text" class="form-control" id="name" name="name" th:value="${coach.name}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="surname">Last Name</label>
+                            <input type="text" class="form-control" id="surname" name="surname" th:value="${coach.surname}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" th:value="${coach.email}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expertise">Expertise</label>
+                        <select class="form-select" id="expertise" name="expertise" required>
+                            <option th:selected="${coach.expertise == 'Mental Health'}" value="Mental Health">Mental Health</option>
+                            <option th:selected="${coach.expertise == 'Physical Fitness'}" value="Physical Fitness">Physical Fitness</option>
+                            <option th:selected="${coach.expertise == 'Nutrition'}" value="Nutrition">Nutrition</option>
+                            <option th:selected="${coach.expertise == 'Holistic Wellness'}" value="Holistic Wellness">Holistic Wellness</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="4" required th:text="${coach.bio}"></textarea>
+                    </div>
+
+                    <!-- Password Update -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-lock"></i> Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('currentPassword')">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="newPassword" name="newPassword">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('newPassword')">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
+                                <small class="text-muted">Minimum 8 characters with at least 1 uppercase, 1 lowercase, and 1 number</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('confirmPassword')">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="card mb-4 border-danger">
+                        <div class="card-header bg-light text-danger">
+                            <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Account Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Delete Account</h6>
+                                    <p class="mb-0 text-muted">Permanently remove your account and all associated data</p>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-coach btn-lg">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Content Management Section -->
     <div id="content-section" class="mb-5">
@@ -183,7 +322,7 @@
         </div>
 
         <div class="row">
-            <!-- Content Cards - Dynamic from database -->
+            <!-- Content Cards - Dynamic from database (UPDATED) -->
             <div th:if="${recentContent == null || recentContent.isEmpty()}" class="col-12 text-center py-5">
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i> You haven't uploaded any content yet.
@@ -193,13 +332,31 @@
 
             <div th:if="${recentContent != null}" th:each="content : ${recentContent}" class="col-md-4 mb-4">
                 <div class="card content-card h-100">
+                    <!-- YouTube Embed -->
+                    <div class="ratio ratio-16x9">
+                        <iframe th:src="${#strings.replace(content.contentUrl, 'watch?v=', 'embed/')}"
+                                allowfullscreen style="border:none;"></iframe>
+                    </div>
                     <div class="card-body">
                         <span th:class="${'badge ' + (content.contentType == 'Mental' ? 'bg-success' :
-                                             content.contentType == 'Physical' ? 'bg-primary' :
-                                             content.contentType == 'Emotional' ? 'bg-warning' : 'bg-info')} + ' mb-2'"
+                                     content.contentType == 'Physical' ? 'bg-primary' :
+                                     content.contentType == 'Emotional' ? 'bg-warning' : 'bg-info')} + ' mb-2'"
                               th:text="${content.contentType}">Category</span>
                         <h5 th:text="${content.contentTitle}">Content Title</h5>
                         <p class="text-muted" th:text="${content.contentDescription}">Description</p>
+
+                        <!-- In the content cards section -->
+                        <div class="mb-2" th:if="${content.feedback != null && !content.feedback.isEmpty()}">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2">
+                                    <!-- Use the pre-calculated average rating -->
+                                    <i th:each="i : ${#numbers.sequence(1,5)}"
+                                       th:class="${i <= averageRatings.get(content.contentId) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-warning'}"></i>
+                                </div>
+                                <small class="text-muted" th:text="'(' + ${content.feedback.size()} + ' ratings)'"></small>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">
                                 <i class="bi bi-calendar"></i>
@@ -217,41 +374,34 @@
         </div>
     </div>
 
-    <!-- Feedback Section -->
+    <!-- Feedback Section (UPDATED) -->
     <div id="feedback-section" class="mb-5">
         <h2 class="mb-4"><i class="bi bi-chat-square-text"></i> Recent Feedback</h2>
 
         <div class="card">
             <div class="card-body">
-                <div class="d-flex align-items-start mb-3">
-                    <img src="https://randomuser.me/api/portraits/women/43.jpg" class="rounded-circle me-3" width="50" height="50">
-                    <div>
-                        <h6>Sarah Johnson</h6>
-                        <div class="mb-2">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <span class="ms-2 text-muted">on Morning Meditation Guide</span>
-                        </div>
-                        <p>"This meditation guide has completely transformed my mornings. I feel so much more centered and ready for the day!"</p>
+                <div th:if="${feedbackList == null || feedbackList.isEmpty()}" class="text-center py-3">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i> No feedback received yet.
                     </div>
                 </div>
 
-                <div class="d-flex align-items-start">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-3" width="50" height="50">
+                <div th:each="feedback : ${feedbackList}" class="d-flex align-items-start mb-3">
+                    <img th:src="${feedback.user != null && feedback.user.profilePicture != null
+                    ? feedback.user.profilePicture
+                    : '/images/default-avatar.png'}"
+                         class="rounded-circle me-3" width="50" height="50"
+                         alt="User Avatar">
                     <div>
-                        <h6>Michael Chen</h6>
+                        <h6 th:text="${feedback.user != null ? (feedback.user.name + ' ' + feedback.user.surname) : 'Anonymous User'}">User Name</h6>
                         <div class="mb-2">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-half text-warning"></i>
-                            <span class="ms-2 text-muted">on Home Workout Routine</span>
+                        <span th:each="i : ${#numbers.sequence(1, 5)}">
+                            <i th:class="${feedback.rating != null && i <= feedback.rating ? 'bi bi-star-fill text-warning' : 'bi bi-star text-warning'}"></i>
+                        </span>
+                            <span class="ms-2 text-muted" th:text="${feedback.content != null ? 'on ' + feedback.content.contentTitle : ''}">on Content Title</span>
                         </div>
-                        <p>"Great routine! I'd love to see a version with progressions for more advanced users."</p>
+                        <p th:text="${feedback.feedbackText != null ? feedback.feedbackText : 'No comment provided.'}">Feedback comment</p>
+                        <small class="text-muted" th:text="${feedback.createdAt != null ? #dates.format(feedback.createdAt, 'MMM dd, yyyy') : ''}">Date</small>
                     </div>
                 </div>
             </div>
@@ -288,9 +438,9 @@
                         <textarea class="form-control" id="contentDescription" name="contentDescription" rows="3" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="contentFile" class="form-label">Upload File</label>
-                        <input class="form-control" type="file" id="contentFile" name="contentFile" accept=".pdf,.mp4,.jpg,.png" required>
-                        <div class="form-text">Supported formats: PDF, MP4, JPG, PNG</div>
+                        <label for="contentUrl" class="form-label">YouTube URL</label>
+                        <input class="form-control" type="url" id="contentUrl" name="contentUrl" placeholder="Enter YouTube URL" required>
+                        <div class="form-text">Example: https://www.youtube.com/watch?v=your_video_id</div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -302,131 +452,37 @@
     </div>
 </div>
 
-<!-- Add Settings to the tab list -->
-<ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
-    <!-- Previous tabs remain -->
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
-            <i class="bi bi-gear"></i> Settings
-        </button>
-    </li>
-</ul>
-
-<!-- Add Settings tab content -->
-<div class="tab-content" id="dashboardTabsContent">
-    <!-- Previous tab content remains -->
-
-    <!-- Settings Tab -->
-    <div class="tab-pane fade" id="settings" role="tabpanel">
-        <div class="profile-card">
-            <h3 class="mb-4"><i class="bi bi-gear"></i> Account Settings</h3>
-
-            <form class="settings-form" th:action="@{/coach/update}" method="post" enctype="multipart/form-data">
-                <!-- Profile Picture Update -->
-                <div class="form-group">
-                    <label>Profile Picture</label>
-                    <div class="d-flex align-items-center">
-                        <img th:src="@{${coach.profilePicture}}" class="profile-img me-4" width="100">
-                        <div>
-                            <input type="file" class="form-control" name="profilePicture" accept="image/*">
-                            <small class="text-muted">Recommended size: 500x500 pixels</small>
-                        </div>
-                    </div>
+<!-- Delete Account Modal (Added) -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAccountModalLabel"><i class="bi bi-exclamation-triangle"></i> Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold">Warning: This action cannot be undone.</p>
+                <p>Deleting your account will permanently remove:</p>
+                <ul>
+                    <li>All your profile information</li>
+                    <li>All content you've uploaded</li>
+                    <li>All feedback and rating history</li>
+                </ul>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete">
+                    <label class="form-check-label" for="confirmDelete">
+                        I understand that this action is permanent and cannot be reversed.
+                    </label>
                 </div>
-
-                <!-- Personal Information -->
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label for="name">First Name</label>
-                        <input type="text" class="form-control" id="name" name="name" th:value="${coach.name}" required>
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label for="surname">Last Name</label>
-                        <input type="text" class="form-control" id="surname" name="surname" th:value="${coach.surname}" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" th:value="${coach.email}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="expertise">Expertise</label>
-                    <select class="form-select" id="expertise" name="expertise" required>
-                        <option th:selected="${coach.expertise == 'Mental Health'}" value="Mental Health">Mental Health</option>
-                        <option th:selected="${coach.expertise == 'Physical Fitness'}" value="Physical Fitness">Physical Fitness</option>
-                        <option th:selected="${coach.expertise == 'Nutrition'}" value="Nutrition">Nutrition</option>
-                        <option th:selected="${coach.expertise == 'Holistic Wellness'}" value="Holistic Wellness">Holistic Wellness</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="bio">Bio</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="4" required th:text="${coach.bio}"></textarea>
-                </div>
-
-                <!-- Password Update -->
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-lock"></i> Change Password</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="currentPassword">Current Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="currentPassword" name="currentPassword">
-                                <span class="input-group-text password-toggle" onclick="togglePassword('currentPassword')">
-                                    <i class="bi bi-eye"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="newPassword">New Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="newPassword" name="newPassword">
-                                <span class="input-group-text password-toggle" onclick="togglePassword('newPassword')">
-                                    <i class="bi bi-eye"></i>
-                                </span>
-                            </div>
-                            <small class="text-muted">Minimum 8 characters with at least 1 uppercase, 1 lowercase, and 1 number</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm New Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
-                                <span class="input-group-text password-toggle" onclick="togglePassword('confirmPassword')">
-                                    <i class="bi bi-eye"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Account Actions -->
-                <div class="card mb-4 border-danger">
-                    <div class="card-header bg-light text-danger">
-                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Account Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6>Delete Account</h6>
-                                <p class="mb-0 text-muted">Permanently remove your account and all associated data</p>
-                            </div>
-                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                                Delete Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-end">
-                    <button type="submit" class="btn btn-coach btn-lg">
-                        <i class="bi bi-save"></i> Save Changes
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form th:action="@{/coach/delete}" method="post">
+                    <button type="submit" class="btn btn-danger" id="deleteAccountBtn" disabled>
+                        <i class="bi bi-trash"></i> Delete My Account
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
