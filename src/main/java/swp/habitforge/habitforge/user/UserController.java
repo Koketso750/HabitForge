@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import swp.habitforge.habitforge.feedback.FeedbackRepository;
 import swp.habitforge.habitforge.notification.Notification;
 import swp.habitforge.habitforge.notification.NotificationRepository;
 import swp.habitforge.habitforge.notification.NotificationService;
@@ -53,6 +54,8 @@ public class UserController {
     @Autowired private ProgressRepository progressRepository;
 
     @Autowired private NotificationRepository notificationRepository;
+
+    @Autowired private FeedbackRepository feedbackRepository;
 
 
     // Directory where profile pictures will be stored
@@ -390,12 +393,19 @@ public class UserController {
         }
 
         try {
-            // First delete all user-related data
-            taskRepository.deleteByUser(loggedInUser);
-            notificationRepository.deleteByUser(loggedInUser);
+            // First delete notifications that reference tasks (using the more comprehensive method)
+            notificationRepository.deleteByUserOrTaskUser(loggedInUser);
+
+            // Then delete progress records
             progressRepository.deleteByUser(loggedInUser);
 
-            // Then delete the user
+            // Then delete tasks
+            taskRepository.deleteByUser(loggedInUser);
+
+            // Then delete feedback
+            feedbackRepository.deleteFeedbackByUser(loggedInUser);
+
+            // Finally delete the user
             userRepository.delete(loggedInUser);
 
             // Clear session
