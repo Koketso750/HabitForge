@@ -1,5 +1,6 @@
 package swp.habitforge.habitforge.wellnesscontent;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -13,5 +14,8 @@ public interface WellnessContentRepository extends CrudRepository<WellnessConten
 
     @Query("SELECT w FROM WellnessContent w WHERE w.contentId = :contentId")
     WellnessContent findWellnessContentById(@Param("contentId") Long contentId);
+
+    @Transactional
+    void deleteWellnessContentByCoach(Coach coach);
 
 }

@@ -11,6 +11,7 @@ import swp.habitforge.habitforge.feedback.Feedback;
 import swp.habitforge.habitforge.feedback.FeedbackService;
 import swp.habitforge.habitforge.user.PasswordResetService;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContent;
+import swp.habitforge.habitforge.wellnesscontent.WellnessContentRepository;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContentService;
 
 import java.io.File;
@@ -28,6 +29,7 @@ public class CoachController {
     @Autowired private WellnessContentService wellnessContentService;
     @Autowired private FeedbackService feedbackService;
     @Autowired private PasswordResetService passwordResetService;
+    @Autowired private WellnessContentRepository wellnessContentRepository;
 
     // Directory where profile pictures will be stored
     private final String UPLOAD_DIR = "src/main/resources/static/images/coaches/";
@@ -123,10 +125,6 @@ public class CoachController {
         }
         return filename.substring(dotIndex);
     }
-
-    // ===========================
-    // NEW LOGIN LOGIC FOR COACHES
-    // ===========================
 
     @PostMapping("/login/coach/dashboard")
     public String processCoachLogin(
@@ -418,5 +416,34 @@ public class CoachController {
 
         redirectAttributes.addFlashAttribute("error", "Coach not found.");
         return "redirect:/coach/forgot-password";
+    }
+
+    @PostMapping("/coach/delete")
+    public String deleteCoachAccount(
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        Coach loggedInCoach = (Coach) session.getAttribute("loggedInCoach");
+        if (loggedInCoach == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to delete your account.");
+            return "redirect:/login/coach";
+        }
+
+        try {
+
+            wellnessContentRepository.deleteWellnessContentByCoach(loggedInCoach);
+
+            coachRepository.deleteByCoachId(loggedInCoach.getCoachId());
+
+            // Clear session
+            session.invalidate();
+
+            redirectAttributes.addFlashAttribute("success", "Your account has been deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error deleting account: " + e.getMessage());
+            return "redirect:/coach/dashboard#settings";
+        }
+
+        return "redirect:/";
     }
 }
