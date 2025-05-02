@@ -144,6 +144,72 @@
         .password-toggle:hover {
             background-color: #f8f9fa;
         }
+
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            color: #ddd;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .rating label:hover,
+        .rating label:hover ~ label,
+        .rating input:checked ~ label {
+            color: var(--accent-orange);
+            transform: scale(1.1);
+        }
+
+        .rating label i {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .rating label small {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-dark);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .rating label:hover small,
+        .rating input:checked ~ label small {
+            opacity: 1;
+        }
+
+        /* Animation for when a star is selected */
+        @keyframes starBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .rating input:checked ~ label i {
+            animation: starBounce 0.5s ease;
+        }
+
+        /* Pulse animation for the submit button when rating is selected */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .rating-selected .btn-primary {
+            animation: pulse 1s infinite;
+        }
     </style>
 </head>
 <body>
@@ -358,38 +424,37 @@
                                 </p>
 
                                 <!-- Feedback Form -->
-                                <form th:action="@{'/feedback/submit/' + ${content.contentId}}" method="post">
-                                    <div class="rating d-flex flex-row justify-content-between">
-                                        <div class="text-center">
-                                            <input type="radio" id="star5-${content.contentId}" name="rating" value="5" required>
-                                            <label for="star5-${content.contentId}">
-                                                <i class="bi bi-star-fill"></i><br>5
-                                            </label>
-                                        </div>
-                                        <div class="text-center">
-                                            <input type="radio" id="star4-${content.contentId}" name="rating" value="4">
-                                            <label for="star4-${content.contentId}">
-                                                <i class="bi bi-star-fill"></i><br>4
-                                            </label>
-                                        </div>
-                                        <div class="text-center">
-                                            <input type="radio" id="star3-${content.contentId}" name="rating" value="3">
-                                            <label for="star3-${content.contentId}">
-                                                <i class="bi bi-star-fill"></i><br>3
-                                            </label>
-                                        </div>
-                                        <div class="text-center">
-                                            <input type="radio" id="star2-${content.contentId}" name="rating" value="2">
-                                            <label for="star2-${content.contentId}">
-                                                <i class="bi bi-star-fill"></i><br>2
-                                            </label>
-                                        </div>
-                                        <div class="text-center">
-                                            <input type="radio" id="star1-${content.contentId}" name="rating" value="1">
-                                            <label for="star1-${content.contentId}">
-                                                <i class="bi bi-star-fill"></i><br>1
-                                            </label>
-                                        </div>
+                                <form th:action="@{'/feedback/submit/' + ${content.contentId}}" method="post" class="feedback-form">
+                                    <div class="rating d-flex flex-row-reverse justify-content-between mb-3">
+                                        <input type="radio" th:id="'star5-' + ${content.contentId}" name="rating" value="5" required>
+                                        <label th:for="'star5-' + ${content.contentId}">
+                                            <i class="bi bi-star-fill"></i>
+                                            <small>5 - Excellent</small>
+                                        </label>
+
+                                        <input type="radio" th:id="'star4-' + ${content.contentId}" name="rating" value="4">
+                                        <label th:for="'star4-' + ${content.contentId}">
+                                            <i class="bi bi-star-fill"></i>
+                                            <small>4 - Good</small>
+                                        </label>
+
+                                        <input type="radio" th:id="'star3-' + ${content.contentId}" name="rating" value="3">
+                                        <label th:for="'star3-' + ${content.contentId}">
+                                            <i class="bi bi-star-fill"></i>
+                                            <small>3 - Average</small>
+                                        </label>
+
+                                        <input type="radio" th:id="'star2-' + ${content.contentId}" name="rating" value="2">
+                                        <label th:for="'star2-' + ${content.contentId}">
+                                            <i class="bi bi-star-fill"></i>
+                                            <small>2 - Poor</small>
+                                        </label>
+
+                                        <input type="radio" th:id="'star1-' + ${content.contentId}" name="rating" value="1">
+                                        <label th:for="'star1-' + ${content.contentId}">
+                                            <i class="bi bi-star-fill"></i>
+                                            <small>1 - Terrible</small>
+                                        </label>
                                     </div>
                                     <div class="mb-3">
                                         <textarea class="form-control" name="feedbackText" rows="2"
@@ -767,6 +832,42 @@
             icon.classList.add('bi-eye');
         }
     }
+
+    // Add this new JavaScript for the rating system
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add rating selection feedback for each form independently
+        document.querySelectorAll('.feedback-form').forEach(form => {
+            const ratingInputs = form.querySelectorAll('.rating input');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            ratingInputs.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    form.classList.add('rating-selected');
+
+                    // Remove the class after animation completes
+                    setTimeout(() => {
+                        form.classList.remove('rating-selected');
+                    }, 1000);
+
+                    // Enable the submit button (if you want it disabled by default)
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                    }
+                });
+            });
+
+            // Add hover effects for rating labels within this form
+            form.querySelectorAll('.rating label').forEach(label => {
+                label.addEventListener('mouseenter', function() {
+                    this.querySelector('i').style.transform = 'scale(1.3)';
+                });
+
+                label.addEventListener('mouseleave', function() {
+                    this.querySelector('i').style.transform = 'scale(1)';
+                });
+            });
+        });
+    });
 </script>
 </body>
 </html>
