@@ -345,18 +345,6 @@
                         <h5 th:text="${content.contentTitle}">Content Title</h5>
                         <p class="text-muted" th:text="${content.contentDescription}">Description</p>
 
-                        <!-- In the content cards section -->
-                        <div class="mb-2" th:if="${content.feedback != null && !content.feedback.isEmpty()}">
-                            <div class="d-flex align-items-center">
-                                <div class="me-2">
-                                    <!-- Use the pre-calculated average rating -->
-                                    <i th:each="i : ${#numbers.sequence(1,5)}"
-                                       th:class="${i <= averageRatings.get(content.contentId) ? 'bi bi-star-fill text-warning' : 'bi bi-star text-warning'}"></i>
-                                </div>
-                                <small class="text-muted" th:text="'(' + ${content.feedback.size()} + ' ratings)'"></small>
-                            </div>
-                        </div>
-
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">
                                 <i class="bi bi-calendar"></i>
