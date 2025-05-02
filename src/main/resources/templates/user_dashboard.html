@@ -125,6 +125,25 @@
         .progress-bar {
             background-color: var(--secondary-brown);
         }
+
+        .profile-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+        }
+
+        .password-toggle:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -171,7 +190,10 @@
     <div class="dashboard-header">
         <div class="row align-items-center">
             <div class="col-md-3 text-center">
-                <img th:src="@{${user.profilePicture}}" alt="Profile Picture" class="profile-img">
+                <img th:src="@{${user.profilePicture}}"
+                     alt="Profile Picture"
+                     class="profile-img"
+                     onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/icons/person-circle.svg'; this.style='background-color: #f8f9fa; padding: 15px;'">
             </div>
             <div class="col-md-9">
                 <h1 class="display-4 mb-2">Welcome, <b><span th:text="${user.name + ' ' + user.surname}" class="text-orange"></span></b></h1>
@@ -180,219 +202,338 @@
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="stat-card">
-                <div class="stat-value" th:text="${taskCount != null ? taskCount : 0}">0</div>
-                <div class="stat-label">Active Tasks</div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="stat-card">
-                <div class="stat-value" th:text="${completedTaskCount != null ? completedTaskCount : 0}">0</div>
-                <div class="stat-label">Completed</div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="stat-card">
-                <div class="stat-value" th:text="${notificationCount != null ? notificationCount : 0}">0</div>
-                <div class="stat-label">Notifications</div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="stat-card">
-                <div class="stat-value" th:text="${progressPercentage != null ? progressPercentage + '%' : '0%'}">0%</div>
-                <div class="stat-label">Overall Progress</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tasks Section -->
-    <div id="tasks-section" class="mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-list-check"></i> My Tasks</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-                <i class="bi bi-plus"></i> Add Task
+    <!-- In the Dashboard Tabs section -->
+    <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab" style="background-color: var(--secondary-brown); color: white;">
+                <i class="bi bi-speedometer2"></i> Dashboard
             </button>
-        </div>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" style="background-color: var(--secondary-brown); color: white;">
+                <i class="bi bi-gear"></i> Settings
+            </button>
+        </li>
+    </ul>
 
-        <div class="card">
-            <div class="card-body">
-                <div th:if="${tasks == null || tasks.isEmpty()}" class="text-center py-3">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i> You don't have any tasks yet. Add one to get started!
+    <!-- Tab content -->
+    <div class="tab-content" id="dashboardTabsContent">
+        <!-- Dashboard Tab -->
+        <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value" th:text="${taskCount != null ? taskCount : 0}">0</div>
+                        <div class="stat-label">Active Tasks</div>
                     </div>
                 </div>
-
-                <div th:if="${tasks != null && !tasks.isEmpty()}">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Task</th>
-                                <th>Due Date</th>
-                                <th>Habit Type</th>
-                                <th>Frequency</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="task : ${tasks}" th:class="${task.completed} ? 'task-completed' : ''">
-                                <td th:text="${task.taskName}"></td>
-                                <td th:text="${#dates.format(task.dueDate, 'MMM dd, yyyy')}"></td>
-                                <td>
-                                        <span class="badge"
-                                              th:class="${task.habitType == 'Mental' ? 'bg-success' :
-                                                         task.habitType == 'Physical' ? 'bg-primary' :
-                                                         task.habitType == 'Emotional' ? 'bg-warning' : 'bg-info'}">
-                                            <span th:text="${task.habitType}"></span>
-                                        </span>
-                                </td>
-                                <td th:text="${task.habitFrequency} + 'x/week'"></td>
-                                <td>
-                                    <span th:if="${task.completed}" class="badge bg-success">Completed</span>
-                                    <span th:unless="${task.completed}" class="badge bg-warning">Pending</span>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-success"
-                                                th:if="${!task.completed}"
-                                                th:onclick="'completeTask(' + ${task.taskId} + ')'">
-                                            <i class="bi bi-check"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                                th:onclick="'deleteTask(' + ${task.taskId} + ')'">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value" th:text="${completedTaskCount != null ? completedTaskCount : 0}">0</div>
+                        <div class="stat-label">Completed</div>
                     </div>
-
-                    <!-- Progress Bar -->
-                    <div class="mt-4">
-                        <h5>Overall Progress</h5>
-                        <div class="progress" style="height: 25px;">
-                            <div class="progress-bar" role="progressbar"
-                                 th:attr="aria-valuenow=${progressPercentage}, style='width: ' + ${progressPercentage} + '%'"
-                                 th:text="${progressPercentage} + '%'">
-                            </div>
-                        </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value" th:text="${notificationCount != null ? notificationCount : 0}">0</div>
+                        <div class="stat-label">Notifications</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-value" th:text="${progressPercentage != null ? progressPercentage + '%' : '0%'}">0%</div>
+                        <div class="stat-label">Overall Progress</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Wellness Content Section -->
-    <div id="content-section" class="mb-5">
-        <h2 class="mb-4"><i class="bi bi-collection-play"></i> Wellness Content</h2>
-
-        <div class="row">
-            <div th:if="${wellnessContent == null || wellnessContent.isEmpty()}" class="col-12 text-center py-5">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i> No wellness content available at the moment.
-                </div>
-            </div>
-
-            <div th:each="content : ${wellnessContent}" class="col-md-4 mb-4">
-                <div class="card content-card h-100">
-                    <div class="ratio ratio-16x9">
-                        <iframe th:src="${#strings.replace(content.contentUrl, 'watch?v=', 'embed/')}"
-                                allowfullscreen style="border:none;"></iframe>
-                    </div>
-                    <div class="card-body">
-                        <span th:class="${'badge ' + (content.contentType == 'Mental' ? 'bg-success' :
-                                     content.contentType == 'Physical' ? 'bg-primary' :
-                                     content.contentType == 'Emotional' ? 'bg-warning' : 'bg-info')} + ' mb-2'"
-                              th:text="${content.contentType}"></span>
-                        <h5 th:text="${content.contentTitle}"></h5>
-                        <p class="text-muted" th:text="${content.contentDescription}"></p>
-                        <p class="text-muted small">
-                            <i class="bi bi-person"></i> Coach:
-                            <span th:text="${content.coach.name + ' ' + content.coach.surname}"></span>
-                        </p>
-
-                        <!-- Feedback Form -->
-                        <form th:action="@{'/feedback/submit/' + ${content.contentId}}" method="post">
-                            <div class="rating d-flex flex-row justify-content-between">
-                                <div class="text-center">
-                                    <input type="radio" id="star5-${content.contentId}" name="rating" value="5" required>
-                                    <label for="star5-${content.contentId}">
-                                        <i class="bi bi-star-fill"></i><br>5
-                                    </label>
-                                </div>
-                                <div class="text-center">
-                                    <input type="radio" id="star4-${content.contentId}" name="rating" value="4">
-                                    <label for="star4-${content.contentId}">
-                                        <i class="bi bi-star-fill"></i><br>4
-                                    </label>
-                                </div>
-                                <div class="text-center">
-                                    <input type="radio" id="star3-${content.contentId}" name="rating" value="3">
-                                    <label for="star3-${content.contentId}">
-                                        <i class="bi bi-star-fill"></i><br>3
-                                    </label>
-                                </div>
-                                <div class="text-center">
-                                    <input type="radio" id="star2-${content.contentId}" name="rating" value="2">
-                                    <label for="star2-${content.contentId}">
-                                        <i class="bi bi-star-fill"></i><br>2
-                                    </label>
-                                </div>
-                                <div class="text-center">
-                                    <input type="radio" id="star1-${content.contentId}" name="rating" value="1">
-                                    <label for="star1-${content.contentId}">
-                                        <i class="bi bi-star-fill"></i><br>1
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <textarea class="form-control" name="feedbackText" rows="2"
-                                          placeholder="Your feedback (optional)"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm w-100">
-                                <i class="bi bi-send"></i> Submit Feedback
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notifications Section -->
-    <div id="notifications-section" class="mb-5">
-        <h2 class="mb-4"><i class="bi bi-bell"></i> Notifications</h2>
-
-        <div class="card">
-            <div class="card-body">
-                <div th:if="${notifications == null || notifications.isEmpty()}" class="text-center py-3">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i> No notifications at this time.
-                    </div>
-                </div>
-
-                <div th:each="notification : ${notifications}" class="d-flex align-items-start mb-3">
-                    <div class="flex-shrink-0">
-                        <i class="bi bi-bell-fill text-warning fs-4"></i>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h6 th:text="${notification.notificationText}"></h6>
-                        <small class="text-muted" th:text="${#dates.format(notification.notificationDate, 'MMM dd, yyyy hh:mm a')}"></small>
-                        <div th:if="${notification.task != null}" class="mt-1">
-                            <small>Related to task: <span th:text="${notification.task.taskName}"></span></small>
-                        </div>
-                    </div>
-                    <button class="btn btn-sm btn-outline-secondary"
-                            th:onclick="'markNotificationAsRead(' + ${notification.notificationId} + ')'">
-                        <i class="bi bi-check"></i> Mark as read
+            <!-- Tasks Section -->
+            <div id="tasks-section" class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-list-check"></i> My Tasks</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                        <i class="bi bi-plus"></i> Add Task
                     </button>
                 </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div th:if="${tasks == null || tasks.isEmpty()}" class="text-center py-3">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> You don't have any tasks yet. Add one to get started!
+                            </div>
+                        </div>
+
+                        <div th:if="${tasks != null && !tasks.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Due Date</th>
+                                        <th>Habit Type</th>
+                                        <th>Frequency</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="task : ${tasks}" th:class="${task.completed} ? 'task-completed' : ''">
+                                        <td th:text="${task.taskName}"></td>
+                                        <td th:text="${#dates.format(task.dueDate, 'MMM dd, yyyy')}"></td>
+                                        <td>
+                                                <span class="badge"
+                                                      th:class="${task.habitType == 'Mental' ? 'bg-success' :
+                                                                 task.habitType == 'Physical' ? 'bg-primary' :
+                                                                 task.habitType == 'Emotional' ? 'bg-warning' : 'bg-info'}">
+                                                    <span th:text="${task.habitType}"></span>
+                                                </span>
+                                        </td>
+                                        <td th:text="${task.habitFrequency} + 'x/week'"></td>
+                                        <td>
+                                            <span th:if="${task.completed}" class="badge bg-success">Completed</span>
+                                            <span th:unless="${task.completed}" class="badge bg-warning">Pending</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-outline-success"
+                                                        th:if="${!task.completed}"
+                                                        th:onclick="'completeTask(' + ${task.taskId} + ')'">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        th:onclick="'deleteTask(' + ${task.taskId} + ')'">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="mt-4">
+                                <h5>Overall Progress</h5>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar" role="progressbar"
+                                         th:attr="aria-valuenow=${progressPercentage}, style='width: ' + ${progressPercentage} + '%'"
+                                         th:text="${progressPercentage} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wellness Content Section -->
+            <div id="content-section" class="mb-5">
+                <h2 class="mb-4"><i class="bi bi-collection-play"></i> Wellness Content</h2>
+
+                <div class="row">
+                    <div th:if="${wellnessContent == null || wellnessContent.isEmpty()}" class="col-12 text-center py-5">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i> No wellness content available at the moment.
+                        </div>
+                    </div>
+
+                    <div th:each="content : ${wellnessContent}" class="col-md-4 mb-4">
+                        <div class="card content-card h-100">
+                            <div class="ratio ratio-16x9">
+                                <iframe th:src="${#strings.replace(content.contentUrl, 'watch?v=', 'embed/')}"
+                                        allowfullscreen style="border:none;"></iframe>
+                            </div>
+                            <div class="card-body">
+                                <span th:class="${'badge ' + (content.contentType == 'Mental' ? 'bg-success' :
+                                             content.contentType == 'Physical' ? 'bg-primary' :
+                                             content.contentType == 'Emotional' ? 'bg-warning' : 'bg-info')} + ' mb-2'"
+                                      th:text="${content.contentType}"></span>
+                                <h5 th:text="${content.contentTitle}"></h5>
+                                <p class="text-muted" th:text="${content.contentDescription}"></p>
+                                <p class="text-muted small">
+                                    <i class="bi bi-person"></i> Coach:
+                                    <span th:text="${content.coach.name + ' ' + content.coach.surname}"></span>
+                                </p>
+
+                                <!-- Feedback Form -->
+                                <form th:action="@{'/feedback/submit/' + ${content.contentId}}" method="post">
+                                    <div class="rating d-flex flex-row justify-content-between">
+                                        <div class="text-center">
+                                            <input type="radio" id="star5-${content.contentId}" name="rating" value="5" required>
+                                            <label for="star5-${content.contentId}">
+                                                <i class="bi bi-star-fill"></i><br>5
+                                            </label>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="radio" id="star4-${content.contentId}" name="rating" value="4">
+                                            <label for="star4-${content.contentId}">
+                                                <i class="bi bi-star-fill"></i><br>4
+                                            </label>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="radio" id="star3-${content.contentId}" name="rating" value="3">
+                                            <label for="star3-${content.contentId}">
+                                                <i class="bi bi-star-fill"></i><br>3
+                                            </label>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="radio" id="star2-${content.contentId}" name="rating" value="2">
+                                            <label for="star2-${content.contentId}">
+                                                <i class="bi bi-star-fill"></i><br>2
+                                            </label>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="radio" id="star1-${content.contentId}" name="rating" value="1">
+                                            <label for="star1-${content.contentId}">
+                                                <i class="bi bi-star-fill"></i><br>1
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" name="feedbackText" rows="2"
+                                                  placeholder="Your feedback (optional)"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                        <i class="bi bi-send"></i> Submit Feedback
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div id="notifications-section" class="mb-5">
+                <h2 class="mb-4"><i class="bi bi-bell"></i> Notifications</h2>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div th:if="${notifications == null || notifications.isEmpty()}" class="text-center py-3">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> No notifications at this time.
+                            </div>
+                        </div>
+
+                        <div th:each="notification : ${notifications}" class="d-flex align-items-start mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-bell-fill text-warning fs-4"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 th:text="${notification.notificationText}"></h6>
+                                <small class="text-muted" th:text="${#dates.format(notification.notificationDate, 'MMM dd, yyyy hh:mm a')}"></small>
+                                <div th:if="${notification.task != null}" class="mt-1">
+                                    <small>Related to task: <span th:text="${notification.task.taskName}"></span></small>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    th:onclick="'markNotificationAsRead(' + ${notification.notificationId} + ')'">
+                                <i class="bi bi-check"></i> Mark as read
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel">
+            <div class="profile-card">
+                <h3 class="mb-4"><i class="bi bi-gear"></i> Account Settings</h3>
+
+                <form class="settings-form" th:action="@{/user/update}" method="post" enctype="multipart/form-data">
+                    <!-- Profile Picture Update -->
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div class="d-flex align-items-center">
+                            <img th:src="@{${user.profilePicture}}" class="profile-img me-4" width="100">
+                            <div>
+                                <input type="file" class="form-control" name="profilePicture" accept="image/*">
+                                <small class="text-muted">Recommended size: 500x500 pixels</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="name">First Name</label>
+                            <input type="text" class="form-control" id="name" name="name" th:value="${user.name}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="surname">Last Name</label>
+                            <input type="text" class="form-control" id="surname" name="surname" th:value="${user.surname}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" th:value="${user.email}" required>
+                    </div>
+
+                    <!-- Password Update -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-lock"></i> Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('currentPassword')">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="newPassword" name="newPassword">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('newPassword')">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
+                                <small class="text-muted">Minimum 8 characters with at least 1 uppercase, 1 lowercase, and 1 number</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('confirmPassword')">
+                                        <i class="bi bi-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="card mb-4 border-danger">
+                        <div class="card-header bg-light text-danger">
+                            <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Account Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>Delete Account</h6>
+                                    <p class="mb-0 text-muted">Permanently remove your account and all associated data</p>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -444,6 +585,41 @@
     </div>
 </div>
 
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAccountModalLabel"><i class="bi bi-exclamation-triangle"></i> Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold">Warning: This action cannot be undone.</p>
+                <p>Deleting your account will permanently remove:</p>
+                <ul>
+                    <li>All your profile information</li>
+                    <li>All your tasks and progress</li>
+                    <li>All your notifications</li>
+                </ul>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete">
+                    <label class="form-check-label" for="confirmDelete">
+                        I understand that this action is permanent and cannot be reversed.
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form th:action="@{/user/delete}" method="post">
+                    <button type="submit" class="btn btn-danger" id="deleteAccountBtn" disabled>
+                        <i class="bi bi-trash"></i> Delete My Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Footer -->
 <footer class="footer text-center mt-5">
     <div class="container">
@@ -478,23 +654,30 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Function to complete a task
     function completeTask(taskId) {
-        if (confirm('Mark this task as completed?')) {
-            fetch('/task/complete/' + taskId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+        fetch('/task/complete/' + taskId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    location.reload();
                 }
             })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert('Error completing task');
-                    }
-                });
-        }
+            .catch(error => {
+                console.error('Error:', error);
+                location.reload();
+            });
     }
 
     // Function to delete a task
@@ -508,10 +691,20 @@
             })
                 .then(response => {
                     if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (data.success) {
                         location.reload();
                     } else {
-                        alert('Error deleting task');
+                        location.reload();
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    location.reload();
                 });
         }
     }
@@ -526,10 +719,20 @@
         })
             .then(response => {
                 if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(data => {
+                if (data.success) {
                     location.reload();
                 } else {
-                    alert('Error marking notification as read');
+                    location.reload();
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                location.reload();
             });
     }
 
@@ -537,7 +740,33 @@
     document.addEventListener('DOMContentLoaded', function() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('dueDate').min = today;
+
+        // Enable/disable delete account button based on checkbox
+        const confirmDelete = document.getElementById('confirmDelete');
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+
+        if (confirmDelete && deleteAccountBtn) {
+            confirmDelete.addEventListener('change', function() {
+                deleteAccountBtn.disabled = !this.checked;
+            });
+        }
     });
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.nextElementSibling.querySelector('i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
 </script>
 </body>
 </html>

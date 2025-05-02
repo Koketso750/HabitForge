@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.habitforge.habitforge.feedback.Feedback;
 import swp.habitforge.habitforge.feedback.FeedbackService;
+import swp.habitforge.habitforge.user.PasswordResetService;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContent;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContentService;
 
@@ -26,7 +27,7 @@ public class CoachController {
     @Autowired private CoachService coachService;
     @Autowired private WellnessContentService wellnessContentService;
     @Autowired private FeedbackService feedbackService;
-
+    @Autowired private PasswordResetService passwordResetService;
 
     // Directory where profile pictures will be stored
     private final String UPLOAD_DIR = "src/main/resources/static/images/coaches/";
@@ -194,7 +195,7 @@ public class CoachController {
         return "coach_dashboard";
     }
 
-    @PostMapping("/coach/admin/update/'")
+    @PostMapping("/coach/admin/update/")
     public String updateCoach(
             @RequestParam String name,
             @RequestParam String surname,
@@ -328,5 +329,94 @@ public class CoachController {
         session.invalidate();
         redirectAttributes.addFlashAttribute("success", "You have been successfully logged out.");
         return "redirect:/login/coach";
+    }
+
+    @GetMapping("/coach/forgot-password")
+    public String showCoachForgotPasswordForm(
+            @RequestParam(name = "email", required = false) String email,
+            Model model,
+            HttpSession session) {
+
+        if (email != null && !email.isEmpty()) {
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("email", email);
+        } else {
+            session.removeAttribute("resetCoachEmail");
+            model.addAttribute("showOtpForm", false);
+        }
+
+        return "forgot_password_coach";
+    }
+
+    @PostMapping("/coach/forgot-password")
+    public String processCoachForgotPassword(
+            @RequestParam String email,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        // Check if email exists
+        Optional<Coach> coach = coachRepository.findByEmail(email);
+        if (coach.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Email not found. Please check your email or sign up.");
+            return "redirect:/coach/forgot-password";
+        }
+
+        try {
+            // Send OTP
+            passwordResetService.sendPasswordResetOtp(email);
+
+            // Store email in session for verification
+            session.setAttribute("resetCoachEmail", email);
+
+            // Redirect with email parameter to show OTP form
+            redirectAttributes.addAttribute("email", email);
+            return "redirect:/coach/forgot-password";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to send OTP. Please try again later.");
+            return "redirect:/coach/forgot-password";
+        }
+    }
+
+    @PostMapping("/coach/verify-otp")
+    public String verifyCoachOtpAndResetPassword(
+            @RequestParam String email,
+            @RequestParam String otp,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        // Validate passwords match
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("error", "Passwords do not match.");
+            redirectAttributes.addAttribute("email", email);
+            return "redirect:/coach/forgot-password";
+        }
+
+        // Verify OTP
+        if (!passwordResetService.verifyOtp(email, otp)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired OTP. Please try again.");
+            redirectAttributes.addAttribute("email", email);
+            return "redirect:/coach/forgot-password";
+        }
+
+        // Update password
+        Optional<Coach> coachOptional = coachRepository.findByEmail(email);
+        if (coachOptional.isPresent()) {
+            Coach coach = coachOptional.get();
+            coach.setPassword(newPassword);
+            coach.setUpdatedAt(new Date());
+            coachRepository.save(coach);
+
+            // Clear OTP and session
+            passwordResetService.clearOtp(email);
+            session.removeAttribute("resetCoachEmail");
+
+            redirectAttributes.addFlashAttribute("success", "Password reset successfully. You can now login with your new password.");
+            return "redirect:/login/coach";
+        }
+
+        redirectAttributes.addFlashAttribute("error", "Coach not found.");
+        return "redirect:/coach/forgot-password";
     }
 }

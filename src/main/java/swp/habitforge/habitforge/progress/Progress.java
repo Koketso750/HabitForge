@@ -12,7 +12,7 @@ public class Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer progressId;
-    private java.sql.Date progressDate;
+    private Date progressDate;
     private Integer progressValue;
     private Date createdAt;
     private Date updatedAt;
@@ -27,7 +27,7 @@ public class Progress {
 
     public Progress() {}
 
-    public Progress(Integer progressId, java.sql.Date progressDate, Integer progressValue, Date createdAt, Date updatedAt, User user, Task task) {
+    public Progress(Integer progressId, Date progressDate, Integer progressValue, Date createdAt, Date updatedAt, User user, Task task) {
         this.progressId = progressId;
         this.progressDate = progressDate;
         this.progressValue = progressValue;
@@ -45,11 +45,11 @@ public class Progress {
         this.progressId = progressId;
     }
 
-    public java.sql.Date getProgressDate() {
+    public Date getProgressDate() {
         return progressDate;
     }
 
-    public void setProgressDate(java.sql.Date progressDate) {
+    public void setProgressDate(Date progressDate) {
         this.progressDate = progressDate;
     }
 

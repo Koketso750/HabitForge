@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import swp.habitforge.habitforge.notification.Notification;
+import swp.habitforge.habitforge.notification.NotificationRepository;
 import swp.habitforge.habitforge.notification.NotificationService;
+import swp.habitforge.habitforge.progress.ProgressRepository;
 import swp.habitforge.habitforge.task.Task;
+import swp.habitforge.habitforge.task.TaskRepository;
 import swp.habitforge.habitforge.task.TaskService;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContent;
 import swp.habitforge.habitforge.wellnesscontent.WellnessContentService;
@@ -40,7 +43,16 @@ public class UserController {
     private WellnessContentService wellnessContentService;
 
     @Autowired
+    private PasswordResetService passwordResetService;
+
+    @Autowired
     private TaskService taskService;
+
+    @Autowired private TaskRepository taskRepository;
+
+    @Autowired private ProgressRepository progressRepository;
+
+    @Autowired private NotificationRepository notificationRepository;
 
 
     // Directory where profile pictures will be stored
@@ -166,12 +178,12 @@ public class UserController {
         // Check if username or email already exists
         if (userService.usernameExists(username)) {
             redirectAttributes.addFlashAttribute("error", "Username already exists. Please choose another one.");
-            return "redirect:/user-sign-up";
+            return "redirect:/user/sign/up";
         }
 
         if (userService.emailExists(email)) {
             redirectAttributes.addFlashAttribute("error", "Email already exists. Please log in.");
-            return "redirect:/user-sign-up";
+            return "redirect:/user/sign/up";
         }
 
         // Create user object
@@ -303,5 +315,188 @@ public class UserController {
 
         redirectAttributes.addFlashAttribute("success", "You have been successfully logged out.");
         return "redirect:/login/user";
+    }
+
+    @PostMapping("/user/update")
+    public String updateUserProfile(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String surname,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String currentPassword,
+            @RequestParam(required = false) String newPassword,
+            @RequestParam(required = false) MultipartFile profilePicture,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) throws IOException {
+
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to update your profile.");
+            return "redirect:/login/user";
+        }
+
+        try {
+            User user = userRepository.findById(loggedInUser.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Update basic info
+            if (name != null && !name.isEmpty()) user.setName(name);
+            if (surname != null && !surname.isEmpty()) user.setSurname(surname);
+            if (email != null && !email.isEmpty()) user.setEmail(email);
+
+            // Update password if provided
+            if (currentPassword != null && !currentPassword.isEmpty() &&
+                    newPassword != null && !newPassword.isEmpty()) {
+
+                if (!user.getPassword().equals(currentPassword)) {
+                    redirectAttributes.addFlashAttribute("error", "Current password is incorrect.");
+                    return "redirect:/user/dashboard#settings";
+                }
+
+                user.setPassword(newPassword);
+            }
+
+            // Update profile picture if provided
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                String fileExtension = getFileExtension(profilePicture.getOriginalFilename());
+                String fileName = "user_" + user.getUserId() + "_" + UUID.randomUUID().toString().substring(0, 8) + fileExtension;
+                Path filePath = Paths.get(UPLOAD_DIR + fileName);
+                Files.write(filePath, profilePicture.getBytes());
+                user.setProfilePicture("/images/profiles/" + fileName);
+            }
+
+            user.setUpdatedAt(new Date());
+            userRepository.save(user);
+
+            // Update session with new user data
+            session.setAttribute("loggedInUser", user);
+
+            redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error updating profile: " + e.getMessage());
+        }
+
+        return "redirect:/user/dashboard#settings";
+    }
+
+    @PostMapping("/user/delete")
+    public String deleteUserAccount(
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            redirectAttributes.addFlashAttribute("error", "Please log in to delete your account.");
+            return "redirect:/login/user";
+        }
+
+        try {
+            // First delete all user-related data
+            taskRepository.deleteByUser(loggedInUser);
+            notificationRepository.deleteByUser(loggedInUser);
+            progressRepository.deleteByUser(loggedInUser);
+
+            // Then delete the user
+            userRepository.delete(loggedInUser);
+
+            // Clear session
+            session.invalidate();
+
+            redirectAttributes.addFlashAttribute("success", "Your account has been deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error deleting account: " + e.getMessage());
+            return "redirect:/user/dashboard#settings";
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm(
+            @RequestParam(name = "email", required = false) String email,
+            Model model,
+            HttpSession session) {
+
+        // Check if we're coming back to the form with email parameter
+        if (email != null && !email.isEmpty()) {
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("email", email);
+        } else {
+            // Clear any existing session attributes
+            session.removeAttribute("resetEmail");
+            model.addAttribute("showOtpForm", false);
+        }
+
+        return "forgot_user_password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(
+            @RequestParam String email,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        // Check if email exists
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "Email not found. Please check your email or sign up.");
+            return "redirect:/forgot-password";
+        }
+
+        try {
+            // Send OTP
+            passwordResetService.sendPasswordResetOtp(email);
+
+            // Store email in session for verification
+            session.setAttribute("resetEmail", email);
+
+            // Redirect with email parameter to show OTP form
+            redirectAttributes.addAttribute("email", email);
+            return "redirect:/forgot-password";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to send OTP. Please try again later.");
+            return "redirect:/forgot-password";
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public String verifyOtpAndResetPassword(
+            @RequestParam String email,
+            @RequestParam String otp,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+
+        // Validate passwords match
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("error", "Passwords do not match.");
+            redirectAttributes.addAttribute("email", email);
+            return "redirect:/forgot-password";
+        }
+
+        // Verify OTP
+        if (!passwordResetService.verifyOtp(email, otp)) {
+            redirectAttributes.addFlashAttribute("error", "Invalid or expired OTP. Please try again.");
+            redirectAttributes.addAttribute("email", email);
+            return "redirect:/forgot-password";
+        }
+
+        // Update password
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setPassword(newPassword);
+            user.setUpdatedAt(new Date());
+            userRepository.save(user);
+
+            // Clear OTP and session
+            passwordResetService.clearOtp(email);
+            session.removeAttribute("resetEmail");
+
+            redirectAttributes.addFlashAttribute("success", "Password reset successfully. You can now login with your new password.");
+            return "redirect:/login/user";
+        }
+
+        redirectAttributes.addFlashAttribute("error", "User not found.");
+        return "redirect:/forgot-password";
     }
 }

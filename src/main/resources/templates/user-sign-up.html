@@ -256,6 +256,11 @@
                 <h2 class="display-4"><i class="bi bi-person-plus"></i> Create Your Account</h2>
                 <p class="lead">Join HabitForge and start your wellness journey today.</p>
                 <form id="userSignUpForm" th:action="@{/user/register}" method="post" enctype="multipart/form-data">
+
+                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+                    </div>
+
                     <!-- Username -->
                     <div class="form-group">
                         <label for="username" class="form-label">Username</label>
@@ -428,6 +433,51 @@
             alert('Please fill out all required fields correctly.');
         }
     };
+
+    // Add this to your existing script section
+    document.getElementById('username').addEventListener('blur', function(e) {
+        const username = e.target.value;
+        if (username.length > 0) {
+            // Make AJAX call to check if username exists
+            fetch(`/api/check-username?username=${username}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        const errorElement = document.createElement('div');
+                        errorElement.className = 'error-message';
+                        errorElement.textContent = 'Username already exists';
+                        e.target.classList.add('is-invalid');
+                        // Remove any existing error message
+                        const existingError = e.target.parentElement.parentElement.querySelector('.username-error');
+                        if (existingError) existingError.remove();
+                        errorElement.classList.add('username-error');
+                        e.target.parentElement.parentElement.appendChild(errorElement);
+                    }
+                });
+        }
+    });
+
+    document.getElementById('email').addEventListener('blur', function(e) {
+        const email = e.target.value;
+        if (email.length > 0) {
+            // Make AJAX call to check if email exists
+            fetch(`/api/check-email?email=${email}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        const errorElement = document.createElement('div');
+                        errorElement.className = 'error-message';
+                        errorElement.textContent = 'Email already exists';
+                        e.target.classList.add('is-invalid');
+                        // Remove any existing error message
+                        const existingError = e.target.parentElement.parentElement.querySelector('.email-error');
+                        if (existingError) existingError.remove();
+                        errorElement.classList.add('email-error');
+                        e.target.parentElement.parentElement.appendChild(errorElement);
+                    }
+                });
+        }
+    });
 </script>
 </body>
 </html>

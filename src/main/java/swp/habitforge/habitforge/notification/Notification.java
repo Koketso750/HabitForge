@@ -13,7 +13,7 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer notificationId;
     private String notificationText;
-    private java.sql.Date notificationDate;
+    private Date notificationDate;
     private Date createdAt;
     private Date updatedAt;
 
@@ -30,7 +30,7 @@ public class Notification {
 
     public Notification() {}
 
-    public Notification(Integer notificationId, String notificationText, java.sql.Date notificationDate, Date createdAt, Date updatedAt, User user, Task task) {
+    public Notification(Integer notificationId, String notificationText, Date notificationDate, Date createdAt, Date updatedAt, User user, Task task) {
         this.notificationId = notificationId;
         this.notificationText = notificationText;
         this.notificationDate = notificationDate;
@@ -56,11 +56,11 @@ public class Notification {
         this.notificationText = notificationText;
     }
 
-    public java.sql.Date getNotificationDate() {
+    public Date getNotificationDate() {
         return notificationDate;
     }
 
-    public void setNotificationDate(java.sql.Date notificationDate) {
+    public void setNotificationDate(Date notificationDate) {
         this.notificationDate = notificationDate;
     }
 
